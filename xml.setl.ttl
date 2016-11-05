@@ -1,0 +1,234 @@
+@prefix rdf:           <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:          <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:           <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:           <http://www.w3.org/2002/07/owl#> .
+@prefix skos:          <http://www.w3.org/2004/02/skos/core#> .
+@prefix prov:          <http://www.w3.org/ns/prov#> .
+@prefix sio:           <http://semanticscience.org/resource/> .
+@prefix dcat:          <http://www.w3.org/ns/dcat#> .
+@prefix dcterms:       <http://purl.org/dc/terms/> .
+@prefix void:          <http://rdfs.org/ns/void#> .
+@prefix foaf:          <http://xmlns.com/foaf/0.1/> .
+@prefix ov:            <http://open.vocab.org/terms/> .
+@prefix setl:          <http://purl.org/twc/vocab/setl/> .
+@prefix csvw:          <http://www.w3.org/ns/csvw#> .
+@prefix pv:            <http://purl.org/net/provenance/ns#>.
+
+@prefix :              <http://nanomine.tw.rpi.edu/setl/xml/> .
+
+@prefix nanopub: <http://www.nanopub.org/nschema#> .
+
+:nanomine_xml a setl:XML;
+  prov:wasGeneratedBy [
+    a setl:Extract;
+  ].
+
+:property_classes_table a csvw:Table, setl:Table;
+  prov:wasGeneratedBy [
+    a setl:Extract;
+    prov:used <https://docs.google.com/spreadsheets/d/1hDqbUzgJ2menVFhkjAvZs5uWgVoO-lxi7nxOh6W2QiA/export?exportFormat=csv&gid=1806836834>;
+  ].
+
+
+:nanopubs a void:Dataset, dcat:Dataset;
+  prov:wasGeneratedBy [
+    a setl:Transform, setl:JSLDT;
+    prov:used :nanomine_xml;
+    prov:qualifiedUsage [ a prov:Usage; prov:entity :property_classes_table; prov:hadRole [ dcterms:identifier "properties"]];
+    setl:hasContext '''{
+  "dataset" : "https://hbgd.tw.rpi.edu/dataset/",
+  "sio" :     "http://semanticscience.org/resource/",
+  "chear" :   "http://hadatac.org/ont/chear#",
+  "skos" :    "http://www.w3.org/2004/02/skos/core#",
+  "dcterms" :    "http://purl.org/dc/terms/",
+  "prov" :    "http://www.w3.org/ns/prov#",
+  "rdfs" :    "http://www.w3.org/2000/01/rdf-schema#",
+  "doi" :    "http://dx.doi.org/",
+  "nanomine" :    "http://nanomine.tw.rpi.edu/ns/",
+  "nanomine" :    "http://nanomine.tw.rpi.edu/ns/unit/",
+  "author" :    "http://nanomine.tw.rpi.edu/author/",
+  "publication" :    "http://nanomine.tw.rpi.edu/publication/",
+  "bibo" : "http://purl.org/ontology/bibo/",
+  "foaf" : "http://xmlns.com/foaf/0.1/",
+  "nanopub" :    "http://www.nanopub.org/nschema#",
+  "entry" :    "http://nanomine.tw.rpi.edu/entry/",
+  "sample" :    "http://nanomine.tw.rpi.edu/sample/",
+  "location" :    "http://nanomine.tw.rpi.edu/location/",
+  "lang" :    "http://nanomine.tw.rpi.edu/language/",
+  "void" :    "http://rdfs.org/ns/void#",
+  "dcat" : "http://www.w3.org/ns/dcat#"
+}''';
+    prov:value '''[{
+    "@for": "id in row.findall('ID')",
+    "@do": {
+      "@if" : "id.text is not None",
+      "@id": "entry:{{slugify(id.text)}}",
+      "@graph": [
+        {
+          "@id": "entry:{{id.text}}",
+          "@type" : "nanopub:Nanopublication",
+          "nanopub:hasAssertion" : {
+            "@id": "entry:{{id.text}}_assertion",
+            "@type": "nanopub:Assertion",
+            "@graph" : [
+              {
+                "@id" : "sample:{{slugify(id.text)}}",
+                "@type" : [
+                  "nanomine:PolymerNanocomposite"
+                ],
+                "sio:hasAttribute" : [
+                  {
+                    "@for" : "i, property in properties.iterrows()",
+                    "@do" : {
+                      "@if" : "not isempty(property.xpath) and row.find('PROPERTIES')",
+                      "@for" : "value in row.find('PROPERTIES').findall('.'+property.xpath)",
+                      "@do" : [
+                       {
+                        "@type" : "{{property.uri}}",
+                        "dc:description" : [
+                          { "@if" : "value.find('description')", "@value" : "{{value.find('description').text}}"},
+                          { "@if" : "value.find('.Description')", "@value" : "{{value.find('Description').text}}"}
+                        ],
+                        "sio:hasValue" : [
+                          {
+                            "@if" : "value.find('.//FixedValue')",
+                            "@value" : "{{value.find('.//FixedValue/value/value').text}}",
+                            "@type" : "xsd:decimal"
+                          },
+                          {
+                            "@if" : "value.find('temperature')",
+                            "@value" : "{{value.find('temperature').text}}",
+                            "@type" : "xsd:decimal"
+                          }
+                        ],
+                        "sio:hasUnit" : [
+                          { "@if" : "value.find('.//FixedValue')",
+                            "@id" : "unit:{{slugify(value.find('.//value/unit').text)}}",
+                            "rdfs:label" : "{{value.find('.//value/unit').text}}"
+                          },
+                          { "@if" : "value.find('unit')",
+                            "@id" : "unit:{{slugify(value.find('unit').text)}}",
+                            "rdfs:label" : "{{value.find('unit').text}}"
+                          }
+                        ],
+                        "sio:hasAttribute" : [
+                          {
+                            "@if" : "value.find('.//uncertainty')",
+                            "@type" : [
+                              "sio:UncertaintyValue",
+                              { "@if" : "value.find('.//uncertainty/type').text == 'fraction'", "@id" : "sio:Ratio" },
+                              { "@if" : "value.find('.//uncertainty/type').text == 'amount'", "@id" : "sio:StandardDeviation" }
+                            ],
+                            "sio:hasValue" : { "@value" : "{{value.find('.//uncertainty/value').text}}", "@type" : "xsd:decimal"}
+                          }
+                        ]
+                       }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "nanopub:hasProvenance" : {
+            "@id": "entry:{{id.text}}_provenance",
+            "@type": "nanopub:Provenance",
+            "@graph" : [
+            ]
+          },
+          "nanopub:hasPublicationInfo" : {
+            "@id": "entry:{{id.text}}_pubinfo",
+            "@type": "nanopub:PublicationInfo",
+            "@graph" : [
+              {
+                "@for" : "citation in row.findall('DATA_SOURCE/Citation')",
+                "@do" : {
+                  "@id" : "entry:{{id.text}}_assertion",
+                  "prov:generatedAtTime" : [
+                    {
+                      "@if" : "citation.find('CommonFields/DateOfCitation')",
+                      "@type" : "xsd:date",
+                      "@value" : "{{citation.find('CommonFields/DateOfCitation').text"
+                    }
+                  ],
+                  "prov:wasQuotedFrom" : [
+                    {
+                      "@id" :  "doi:{{citation.find('CommonFields/DOI').text}}",
+                      "@type" : [
+                        "dcterms:BibliographicResource",
+                        { "@id" : "{{ {'research article':'nanomine:ResearchArticle','conference proceeding':'nanomine:ProceedingsArticle','communication':'nanomine:Communication','review':'nanomine:ReviewArticle','letter':'bibo:Letter','technical comment':'nanomine:TechnicalComment'}[citation.find('CommonFields/CitationType').text] }}"}
+                      ],
+                        "dcterms:title" : "{{citation.find('CommonFields/Title').text}}",
+                        "rdfs:seeAlso" : {
+                          "@if" : "citation.find('CommonFields/URL').text",
+                          "@id" : "{{citation.find('CommonFields/URL').text}}"
+                        },
+                        "dcterms:created" : {
+                          "@value" : "{{citation.find('CommonFields/PublicationYear').text}}",
+                          "@type" : "xsd:integer"
+                        },
+                        "bibo:volume" : {
+                          "@if" : "citation.find('CommonFields/Volume').text",
+                          "@value" : "{{citation.find('CommonFields/Volume').text}}",
+                          "@type" : "xsd:integer"
+                        },
+                        "dcterms:language" : {
+                          "@if" : "citation.find('CommonFields/Language').text",
+                          "@id" : "lang:{{slugify(citation.find('CommonFields/Language').text)}}",
+                          "@type" : "dcterms:LinguisticSystem",
+                          "rdfs:label" : "{{citation.find('CommonFields/Language').text}}"
+                        },
+                        "dcterms:creator" : [
+                          {
+                            "@for" : "author in citation.findall('CommonFields/Author')",
+                            "@do" : 
+                              {
+                                "@id" : "author:{{slugify(author.text)}}",
+                                "@type" : "prov:Agent",
+                                "foaf:name" : "{{author.text}}"
+                              }
+                          }
+                        ],
+                        "dcterms:isPartOf" : {
+                          "@id" : "publication:{{slugify(citation.find('CommonFields/Publication').text)}}",
+                          "dcterms:title" : "{{citation.find('CommonFields/Publication').text}}",
+                          "dcterms:publisher" : {
+                            "@if" : "citation.find('CommonFields/Publisher').text",
+                            "@id" : "publisher:{{slugify(citation.find('CommonFields/Publisher').text)}}",
+                            "rdfs:label" : "{{citation.find('CommonFields/Publisher').text}}",
+                            "prov:atLocation" : {
+                              "@if" : "citation.find('CommonFields/Location').text",
+                              "@type" : "dcterms:Location",
+                              "@id" : "location:{{slugify(citation.find('CommonFields/Location').text)}}",
+                              "rdfs:label" : "{{citation.find('CommonFields/Location').text}}"
+                            }
+                          }
+                        },
+                        "dcat:keyword" : [
+                          {
+                            "@for" : "keyword in citation.findall('CommonFields/Keyword')",
+                            "@do" : [
+                              {
+                                "@if" : "';' in keyword.text",
+                                "@for" : "k in re.split('\\\\s*[;]\\\\s*', keyword.text)",
+                                "@do" : "{{k.strip().title()}}"
+                              },
+                              {
+                                "@if" : "';' not in keyword",
+                                "@value" : "{{keyword.text.strip().title()}}"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+]'''
+  ].
