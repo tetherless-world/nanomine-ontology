@@ -13,6 +13,7 @@
 @prefix setl:          <http://purl.org/twc/vocab/setl/> .
 @prefix csvw:          <http://www.w3.org/ns/csvw#> .
 @prefix pv:            <http://purl.org/net/provenance/ns#>.
+@prefix sp:            <http://spinrdf.org/sp#>.
 
 @prefix :              <http://nanomine.tw.rpi.edu/setl/xml/> .
 
@@ -29,7 +30,6 @@
     prov:used <https://docs.google.com/spreadsheets/d/1hDqbUzgJ2menVFhkjAvZs5uWgVoO-lxi7nxOh6W2QiA/export?exportFormat=csv&gid=1806836834>;
   ].
 
-
 :nanopubs a void:Dataset, dcat:Dataset;
   prov:wasGeneratedBy [
     a setl:Transform, setl:JSLDT;
@@ -45,7 +45,7 @@
   "rdfs" :    "http://www.w3.org/2000/01/rdf-schema#",
   "doi" :    "http://dx.doi.org/",
   "nanomine" :    "http://nanomine.tw.rpi.edu/ns/",
-  "nanomine" :    "http://nanomine.tw.rpi.edu/ns/unit/",
+  "unit" :    "http://nanomine.tw.rpi.edu/ns/unit/",
   "author" :    "http://nanomine.tw.rpi.edu/author/",
   "publication" :    "http://nanomine.tw.rpi.edu/publication/",
   "bibo" : "http://purl.org/ontology/bibo/",
@@ -53,6 +53,7 @@
   "nanopub" :    "http://www.nanopub.org/nschema#",
   "entry" :    "http://nanomine.tw.rpi.edu/entry/",
   "sample" :    "http://nanomine.tw.rpi.edu/sample/",
+  "compound" :    "http://nanomine.tw.rpi.edu/compound/",
   "location" :    "http://nanomine.tw.rpi.edu/location/",
   "lang" :    "http://nanomine.tw.rpi.edu/language/",
   "void" :    "http://rdfs.org/ns/void#",
@@ -75,6 +76,168 @@
                 "@id" : "sample:{{slugify(id.text)}}",
                 "@type" : [
                   "nanomine:PolymerNanocomposite"
+                ],
+                "sio:hasComponentPart" : [
+                  { "@for" : "particle in row.findall('MATERIALS/Particle')",
+                    "@do" : {
+                      "@id" : "sample:{{slugify(id.text)}}_particle",
+                      "@type" : ["nanomine:Particle",
+                        {
+                          "@id" : "compound:{{slugify(particle.find('ChemicalName').text)}}",
+                          "@type" : "owl:Class",
+                          "rdfs:subClassOf" : {"@id":"nanomine:Particle"},
+                          "rdfs:label" : "{{particle.find('ChemicalName').text}}"
+                        }
+                      ],
+                      "sio:hasAttribute" : [
+                        {
+                          "@if" : "particle.find('Density')",
+                          "@for" : "density in particle.findall('Density')",
+                          "@do" : {
+                            "@type" : "sio:Density",
+                            "sio:hasValue" : {
+                                "@value" : "{{density.find('value').text}}",
+                                "@type" : "xsd:decimal"
+                              },
+                            "sio:hasUnit" : [
+                              { "@if" : "density.find('unit')",
+                                "@id" : "unit:{{slugify(density.find('unit').text)}}",
+                                "rdfs:label" : "{{density.find('unit').text}}"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "@if" : "particle.find('SpecificSurfaceArea')",
+                          "@for" : "area in particle.findall('SpecificSurfaceArea')",
+                          "@do" : {
+                            "@type" : "sio:SurfaceArea",
+                            "sio:hasValue" : {
+                                "@value" : "{{area.find('value/value').text}}",
+                                "@type" : "xsd:decimal"
+                              },
+                            "sio:hasUnit" : [
+                              { "@if" : "area.find('value/unit')",
+                                "@id" : "unit:{{slugify(area.find('value/unit').text)}}",
+                                "rdfs:label" : "{{area.find('value/unit').text}}"
+                              }
+                            ],
+                            "sio:hasAttribute" : [
+                              {
+                                "@if" : "area.find('.//uncertainty')",
+                                "@type" : [
+                                  "sio:UncertaintyValue",
+                                  { "@if" : "area.find('.//uncertainty/type').text == 'fraction'", "@id" : "sio:Ratio" },
+                                  { "@if" : "area.find('.//uncertainty/type').text == 'amount'", "@id" : "sio:StandardDeviation" }
+                                ],
+                                "sio:hasValue" : { "@value" : "{{area.find('.//uncertainty/value').text}}", "@type" : "xsd:decimal"}
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "@if" : "particle.find('ParticleAspectRatio/FixedValue')",
+                          "@for" : "ratio in particle.findall('ParticleAspectRatio/FixedValue')",
+                          "@do" : {
+                            "@type" : "sio:AspectRatio",
+                            "sio:hasValue" : {
+                                "@value" : "{{ratio.find('value/value').text}}",
+                                "@type" : "xsd:decimal"
+                              },
+                            "sio:hasUnit" : [
+                              { "@if" : "ratio.find('value/unit')",
+                                "@id" : "unit:{{slugify(ratio.find('value/unit').text)}}",
+                                "rdfs:label" : "{{ratio.find('value/unit').text}}"
+                              }
+                            ],
+                            "sio:hasAttribute" : [
+                              {
+                                "@if" : "ratio.find('.//uncertainty')",
+                                "@type" : [
+                                  "sio:UncertaintyValue",
+                                  { "@if" : "ratio.find('.//uncertainty/type').text == 'fraction'", "@id" : "sio:Ratio" },
+                                  { "@if" : "ratio.find('.//uncertainty/type').text == 'amount'", "@id" : "sio:StandardDeviation" }
+                                ],
+                                "sio:hasValue" : { "@value" : "{{ratio.find('.//uncertainty/value').text}}", "@type" : "xsd:decimal"}
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "@if" : "particle.find('ParticleSize/FixedValue')",
+                          "@for" : "size in particle.findall('ParticleSize/FixedValue')",
+                          "@do" : {
+                            "@type" : "sio:Width",
+                            "sio:hasValue" : {
+                                "@value" : "{{size.find('value/value').text}}",
+                                "@type" : "xsd:decimal"
+                              },
+                            "sio:hasUnit" : [
+                              { "@if" : "size.find('value/unit')",
+                                "@id" : "unit:{{slugify(size.find('value/unit').text)}}",
+                                "rdfs:label" : "{{size.find('value/unit').text}}"
+                              }
+                            ],
+                            "sio:hasAttribute" : [
+                              {
+                                "@if" : "size.find('.//uncertainty')",
+                                "@type" : [
+                                  "sio:UncertaintyValue",
+                                  { "@if" : "size.find('.//uncertainty/type').text == 'fraction'", "@id" : "sio:Ratio" },
+                                  { "@if" : "size.find('.//uncertainty/type').text == 'amount'", "@id" : "sio:StandardDeviation" }
+                                ],
+                                "sio:hasValue" : { "@value" : "{{size.find('.//uncertainty/value').text}}", "@type" : "xsd:decimal"}
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "@if" : "particle.find('CrystalPhase')",
+                          "@for" : "phase in particle.findall('CrystalPhase')",
+                          "@do" : {
+                            "@type" : [
+                              "nanomine:CrystalPhase",
+                              {
+                                  "@id" : "nanomine:{{slugify(phase.text)}}",
+                                  "@type" : "owl:Class",
+                                  "rdfs:label" : "{{phase.text}}",
+                                  "rdfs:subClassOf" : {"@id":"nanomine:CrystalPhase"}
+                              }
+                            ]
+                          }
+                        }
+                      ],
+                      "sio:isSurroundedBy" : [
+                        { "@for" : "surface in row.findall('MATERIALS/ParticleSurfaceTreatment')",
+                          "@do" : {
+                            "@id" : "sample:{{slugify(id.text)}}_surfacetreatment",
+                            "@type" : [
+                              "nanomine:SurfaceTreatment",
+                              {
+                                "@id" : "compound:{{slugify(surface.find('ChemicalName').text)}}",
+                                "@type" : "owl:Class",
+                                "rdfs:subClassOf" : {"@id":"nanomine:SurfaceTreatment"},
+                                "rdfs:label" : "{{surface.find('ChemicalName').text}}"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  { "@for" : "polymer in row.findall('MATERIALS/Polymer')",
+                    "@do" : {
+                      "@id" : "sample:{{slugify(id.text)}}_polymer",
+                      "@type" : ["nanomine:Polymer",
+                        {
+                          "@id" : "compound:{{slugify(polymer.find('ChemicalName').text)}}",
+                          "@type" : "owl:Class",
+                          "rdfs:subClassOf" : {"@id":"nanomine:Polymer"},
+                          "rdfs:label" : "{{polymer.find('ChemicalName').text}}"
+                        }
+                      ]
+                    }
+                  }
                 ],
                 "sio:hasAttribute" : [
                   {
