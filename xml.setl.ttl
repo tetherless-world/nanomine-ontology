@@ -59,7 +59,7 @@
   "void" :    "http://rdfs.org/ns/void#",
   "dcat" : "http://www.w3.org/ns/dcat#"
 }''';
-    prov:value '''[{
+    prov:value """[{
     "@for": "id in row.findall('ID')",
     "@do": {
       "@if" : "id.text is not None",
@@ -198,7 +198,7 @@
                             "@type" : [
                               "nanomine:CrystalPhase",
                               {
-                                  "@id" : "nanomine:{{slugify(phase.text)}}",
+                                  "@id" : "nanomine:{{camelcase(phase.text)}}",
                                   "@type" : "owl:Class",
                                   "rdfs:label" : "{{phase.text}}",
                                   "rdfs:subClassOf" : {"@id":"nanomine:CrystalPhase"}
@@ -214,7 +214,7 @@
                             "@type" : [
                               "nanomine:SurfaceTreatment",
                               {
-                                "@id" : "compound:{{slugify(surface.find('ChemicalName').text)}}",
+                                "@id" : "compound:{{camelcase(surface.find('ChemicalName').text)}}",
                                 "@type" : "owl:Class",
                                 "rdfs:subClassOf" : {"@id":"nanomine:SurfaceTreatment"},
                                 "rdfs:label" : "{{surface.find('ChemicalName').text}}"
@@ -230,7 +230,7 @@
                       "@id" : "sample:{{slugify(id.text)}}_polymer",
                       "@type" : ["nanomine:Polymer",
                         {
-                          "@id" : "compound:{{slugify(polymer.find('ChemicalName').text)}}",
+                          "@id" : "compound:{{camelcase(polymer.find('ChemicalName').text)}}",
                           "@type" : "owl:Class",
                           "rdfs:subClassOf" : {"@id":"nanomine:Polymer"},
                           "rdfs:label" : "{{polymer.find('ChemicalName').text}}"
@@ -239,11 +239,55 @@
                     }
                   }
                 ],
+                "@reverse": {
+                  "prov:specializationOf" : [
+                    {
+                      "@for" : "i, property in properties.iterrows()",
+                      "@do" : {
+                         "@if" : "not isempty(property.xpath) and row.find('PROPERTIES')",
+                         "@for" : "table in row.find('PROPERTIES').findall('.'+property.xpath+'/data')",
+                         "@do" : {
+                             "@for" : "row in table.findall('rows/row')",
+                             "@do" : [
+                               {
+                                 "@id" : "sample:{{slugify(id.text)}}_{{slugify(property.uri)}}_{{row.attrib['id']}}",
+                                 "@type" : [
+                                   "nanomine:PolymerNanocomposite"
+                                 ],
+                                 "sio:hasAttribute" : [
+                                   {
+                                     "@type" : "{{property.uri}}",
+                                     "sio:hasValue" : { "@value" : "{{row.findall('column')[1].text}}", "@type": "xsd:decimal"}
+                                   },
+                                   {
+                                     "@type" : [
+                                       {
+                                         "@if" : "not isempty(property.curveIndependentVar)",
+                                         "@id" : "{{property.curveIndependentVar}}"
+                                       },
+                                       {
+                                         "@if" : "isempty(property.curveIndependentVar)",
+                                         "@id" : "nanomine:{{camelcase(table.findall('headers/column')[0].text)}}",
+                                         "@type" : "owl:Class",
+                                         "rdfs:subClassOf" : {"@id" : "sio:Quantity"},
+                                         "rdfs:label" : "{{table.findall('headers/column')[0].text}}"
+                                       }
+                                     ],
+                                     "sio:hasValue" : { "@value" : "{{row.findall('column')[0].text}}", "@type": "xsd:decimal"}
+                                   }
+                                 ]
+                               }
+                             ]
+                         }
+                       }
+                     }
+                  ]
+                },
                 "sio:hasAttribute" : [
                   {
                     "@for" : "i, property in properties.iterrows()",
                     "@do" : {
-                      "@if" : "not isempty(property.xpath) and row.find('PROPERTIES')",
+                      "@if" : "not isempty(property.xpath) and row.find('PROPERTIES') and not row.find('PROPERTIES').findall('.'+property.xpath+'/data')",
                       "@for" : "value in row.find('PROPERTIES').findall('.'+property.xpath)",
                       "@do" : [
                        {
@@ -393,5 +437,5 @@
       ]
     }
   }
-]'''
+]"""
   ].

@@ -24,11 +24,15 @@ dc = Namespace('http://purl.org/dc/terms/')
 pv = Namespace('http://purl.org/net/provenance/ns#')
 
 
-def convert_xml():
+def convert_xml(debug=None):
     setl_graph = Graph()
     setl_graph.load(SETL_FILE,format="turtle")
     cwd = os.getcwd()
-    for filename in os.listdir(XML_DIR)[:PROCESS_FILE_COUNT]:
+    if debug:
+        files = [debug]
+    else:
+        files = os.listdir(XML_DIR)[:PROCESS_FILE_COUNT]
+    for filename in files:
         print 'Processing', filename
         local_setl_graph = Graph()
         local_setl_graph += setl_graph
@@ -45,7 +49,7 @@ def convert_xml():
         generated_by.set(prov.used, URIRef('http://nanomine.tw.rpi.edu/setl/xml/nanopubs'))
 
         resources = setlr._setl(local_setl_graph)
-        for graph in resources.values():
+        for identifier, graph in resources.items():
             if hasattr(graph, 'close'):
-                print "Closing",graph.identifier
+                print "Closing",identifier
                 graph.close()

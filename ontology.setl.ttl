@@ -42,6 +42,19 @@
     prov:used <https://docs.google.com/spreadsheets/d/1hDqbUzgJ2menVFhkjAvZs5uWgVoO-lxi7nxOh6W2QiA/export?exportFormat=csv&gid=1806836834>;
   ].
 
+:material_classes_table a csvw:Table, setl:Table;
+  prov:wasGeneratedBy [
+    a setl:Extract;
+    prov:used <https://docs.google.com/spreadsheets/d/1hDqbUzgJ2menVFhkjAvZs5uWgVoO-lxi7nxOh6W2QiA/export?exportFormat=csv&gid=1042381215>;
+  ].
+
+:characterization_classes_table a csvw:Table, setl:Table;
+  prov:wasGeneratedBy [
+    a setl:Extract;
+    prov:used <https://docs.google.com/spreadsheets/d/1hDqbUzgJ2menVFhkjAvZs5uWgVoO-lxi7nxOh6W2QiA/export?exportFormat=csv&gid=798992913>;
+  ].
+
+
 <http://nanomine.tw.rpi.edu/ns> a void:Dataset;
   prov:wasGeneratedBy [
     a setl:Transform, setl:JSLDT;
@@ -149,10 +162,82 @@
                     { "@if" : "not isempty(row.unit)",
                       "@type" : "owl:Restriction",
                       "owl:onProperty" : { "@id":"sio:hasUnit"},
-                      "owl:hasValue" : { "@id": "nanomine:unit/{{slugify(row.unit)}}", "rdfs:label" : "{{row.unit}}", "@type" : "sio:UnitOfMeasure" }
+                      "owl:hasValue" : { "@id": "nanomine:unit/{{slugify(row.unit)}}", "rdfs:label" : "{{row.unit}}", "@type" : "sio:UnitOfMeasurement" }
                     }
                 ]
 	}]
+}]'''], [
+    a setl:Transform, setl:JSLDT;
+    prov:used :material_classes_table;
+    setl:hasContext '''{
+  "@vocab" :  "http://nanomine.tw.rpi.edu/",
+  "sio" :     "http://semanticscience.org/resource/",
+  "chear" :   "http://hadatac.org/ont/chear#",
+  "skos" :    "http://www.w3.org/2004/02/skos/core#",
+  "prov" :    "http://www.w3.org/ns/prov#",
+  "dc"   :    "http://purl.org/dc/terms/",
+  "cmo"  :    "http://purl.org/twc/ontologies/cmo.owl#",
+  "owl": "http://www.w3.org/2002/07/owl#",
+  "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+  "rdfs" :    "http://www.w3.org/2000/01/rdf-schema#",
+  "nanomine" :    "http://nanomine.tw.rpi.edu/ns/"
+}''';
+    prov:value '''[{
+	"@id": "http://nanomine.tw.rpi.edu/ns",
+	"@graph": [{
+		"@id": "{{row.uri}}",
+                "@type" : "owl:Class",
+                "rdfs:label" : "{{row.label}}",
+                "skos:altLabel" : [ { "@if" : "not isempty(row.altLabel)", "@value": "{{row.altLabel}}" }],
+                "skos:definition" : [ { "@if" : "not isempty(row.definition)", "@value": "{{row.definition}}" }],
+                "prov:wasQuotedFrom" : [ { "@if" : "not isempty(row.wasQuotedFrom)", "@value": "{{row.wasQuotedFrom}}" }],
+                "rdfs:subClassOf" : [
+                    { "@if" : "not isempty(row.subClassOf)", "@id": "{{row.subClassOf}}" },
+                    { "@if" : "not isempty(row.unit)",
+                      "@type" : "owl:Restriction",
+                      "owl:onProperty" : { "@id":"sio:hasUnit"},
+                      "owl:hasValue" : { "@id": "nanomine:unit/{{slugify(row.unit)}}", "rdfs:label" : "{{row.unit}}", "@type" : "sio:UnitOfMeasurement" }
+                    }
+                ]
+	}]
+}]'''], [
+    a setl:Transform, setl:JSLDT;
+    prov:used :characterization_classes_table;
+    setl:hasContext '''{
+  "@vocab" :  "http://nanomine.tw.rpi.edu/",
+  "sio" :     "http://semanticscience.org/resource/",
+  "chear" :   "http://hadatac.org/ont/chear#",
+  "skos" :    "http://www.w3.org/2004/02/skos/core#",
+  "prov" :    "http://www.w3.org/ns/prov#",
+  "dc"   :    "http://purl.org/dc/terms/",
+  "cmo"  :    "http://purl.org/twc/ontologies/cmo.owl#",
+  "owl": "http://www.w3.org/2002/07/owl#",
+  "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+  "rdfs" :    "http://www.w3.org/2000/01/rdf-schema#",
+  "nanomine" :    "http://nanomine.tw.rpi.edu/ns/"
+}''';
+    prov:value '''[{
+	"@id": "http://nanomine.tw.rpi.edu/ns",
+        "@context": "https://raw.githubusercontent.com/jimmccusker/ontext/master/owl-context.jsonld",
+	"@graph": [
+            {
+		"@id": "{{row.uri}}",
+                "@type" : "owl:Class",
+                "rdfs:label" : "{{row.label}}",
+                "skos:altLabel" : [ { "@if" : "not isempty(row.altLabel)", "@value": "{{row.altLabel}}" }],
+                "skos:definition" : [ { "@if" : "not isempty(row.definition)", "@value": "{{row.definition}}" }],
+                "prov:wasQuotedFrom" : [ { "@if" : "not isempty(row.wasQuotedFrom)", "@value": "{{row.wasQuotedFrom}}" }],
+                "nanomine:hasSelector" : [ { "@if" : "not isempty(row.xpath)", "@value": "{{row.xpath}}" }],
+                "rdfs:subClassOf" : [
+                    { "@if" : "not isempty(row.subClassOf)", "@id": "{{row.subClassOf}}" },
+                    { "@if" : "not isempty(row.unit)",
+                      "@type" : "owl:Restriction",
+                      "owl:onProperty" : { "@id":"sio:hasUnit"},
+                      "owl:hasValue" : { "@id": "nanomine:unit/{{slugify(row.unit)}}", "rdfs:label" : "{{row.unit}}", "@type" : "sio:UnitOfMeasurement" }
+                    }
+                ]
+	    }
+        ]
 }]'''].
 
 
