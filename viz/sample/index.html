@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ADF Widget Sample">
+
+    <title>Nanomine Dashboard</title>
+
+    <!-- bower:css -->
+    <!-- endbower -->
+
+    <!-- inject:css -->
+    <!-- endinject -->
+
+    <!-- inlince css -->
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+      }
+    </style>
+
+    <script type="text/javascript" src="../components/adf-structures-base/dist/adf-structures-base.min.js"></script>
+
+  </head>
+
+  <body ng-app="nanomine">
+
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Nanomine Dashboard</a>
+<!--          <ul class="nav navbar-nav">
+            <li><a >New data in graphene</a></li>
+            <li><a>New data in </a></li>
+            <li><a>X new Users of NanoMine – see who they are</a></li>
+            <li><a>New NanoMine Features</a></li>
+          </ul>-->
+        </div>
+      </div>
+    </div>
+
+    <div class="container" ng-controller="dashboardController">
+      <adf-dashboard name="widgetSampleDashboard" structure="6-6" adf-model="dashboard.model" />
+    </div>
+
+    <!-- bower:js -->
+    <!-- endbower -->
+
+    <!-- inject:js -->
+    <!-- endinject -->
+
+    <script type="text/javascript">
+
+    </script>
+  </body>
+</html>
