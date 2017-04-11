@@ -12,7 +12,7 @@ String.prototype.unCamelCase = function(){
 
 var nanomineD3 = angular.module('adf.widget.nanomine-d3', ['adf.provider', 'nvd3']);
 
-nanomineD3.value('nanomineEndpoint', "http://localhost:9999/bigdata/sparql");
+nanomineD3.value('nanomineEndpoint', "http://nanomine.northwestern.edu:8001/blazegraph/sparql");
 
 function appendTransform(defaults, transform) {
 
@@ -119,46 +119,76 @@ nanomineD3.controller('nanomineD3EditController', [
         $scope.config = config;
         loadAttributes().then(function(attributes) {
             $scope.attributes = attributes;
+            $scope.xAttributes = attributes;
+            $scope.yAttributes = attributes;
             console.log(attributes);
         });
+        $scope.$watch("config.x",function(attr) {
+            loadAttributes($scope.config.x).then(function(attributes) {
+                $scope.yAttributes = attributes;
+                console.log("Setting new y attributes", attributes);
+            });
+        });
+        $scope.$watch("config.y",function(attr) {
+            loadAttributes($scope.config.y).then(function(attributes) {
+                $scope.xAttributes = attributes;
+                console.log("Setting new x attributes", attributes);
+            });
+        });
+        
         console.log($scope.config);
     }]);
 
 nanomineD3.factory('conf', function() {
     var config = {
-        endpoint : "http://localhost:9999/bigdata/sparql"
+        endpoint : "http://nanomine.northwestern.edu:8001/blazegraph/sparql"
     };
     return config;
 })
 
+nanomineD3.factory('sparqlValuesBinder', function() {
+    function sparqlValuesBinder(objects, keys) {
+        var values = 'VALUES (' + keys.map(function(d) { return "?"+d[1]}).join(" ") +') { \n';
+        console.log(objects);
+        values = values + objects.map(function(o) {
+            var value = "(" + keys.map(function(key) {
+                if (!o[key[0]]) return "UNDEF";
+                return "<" + o[key[0]] + ">";
+            }).join(" ") + ")";
+            return value;
+        }).join("\n") + ' }';
+        return values;
+    }
+    return sparqlValuesBinder;
+});
+
 nanomineD3.factory('loadData', ['$http', 'conf', '$q', function($http, conf, $q) {
-    var query = 'prefix nanomine: <http://nanomine.tw.rpi.edu/ns/>\
-prefix sio: <http://semanticscience.org/resource/>\
-select distinct ?composite ?ParticleType ?ParticleTypeLabel ?PolymerType ?PolymerTypeLabel ?SurfaceTreatmentType ?SurfaceTreatmentTypeLabel ?type ?materialType ?value ?unit ?unitLabel where {\
-  ?composite a nanomine:PolymerNanocomposite.\
-  ?composite sio:hasComponentPart?/sio:isSurroundedBy? ?p.\
-  optional {\
-    ?composite sio:hasComponentPart [a ?particleType].\
-    ?ParticleType rdfs:subClassOf nanomine:Particle; rdfs:label ?ParticleTypeLabel.\
-  }\
-  optional {\
-    ?composite sio:hasComponentPart [a ?PolymerType].\
-    ?PolymerType rdfs:subClassOf nanomine:Polymer; rdfs:label ?PolymerTypeLabel.\
-  }\
-  optional {\
-    ?composite sio:hasComponentPart/sio:isSurroundedBy [a ?surfaceType].\
-    ?SurfaceTreatmentType rdfs:label ?SurfaceTreatmentTypeLabel.\
-  }\
-  ?p a ?materialType.\
-  ?p sio:hasAttribute ?attr.\
-  ?attr a ?type.\
-  ?attr sio:hasValue ?value.\
-  optional {\
-    ?attr sio:hasUnit ?unit.\
-    ?unit rdfs:label ?unitLabel.\
-  }\
-}\
-';
+    var query = 'prefix nanomine: <http://nanomine.tw.rpi.edu/ns/>\n\
+prefix sio: <http://semanticscience.org/resource/>\n\
+prefix prov: <http://www.w3.org/ns/prov#>\n\
+select distinct ?composite ?ParticleType ?ParticleTypeLabel ?PolymerType ?PolymerTypeLabel ?SurfaceTreatmentType ?SurfaceTreatmentTypeLabel ?type ?materialType ?value ?unit where {\n\
+  ?p a ?materialType.\n\
+  ?p sio:hasAttribute ?attr.\n\
+  ?attr a ?type.\n\
+  ?attr sio:hasValue ?value.\n\
+  optional {\n\
+    ?attr sio:hasUnit ?unit.\n\
+  }\n\
+  ?composite a nanomine:PolymerNanocomposite.\n\
+  ?composite prov:specializationOf?/sio:hasComponentPart?/sio:isSurroundedBy? ?p.\n\
+  optional {\n\
+    ?composite prov:specializationOf?/sio:hasComponentPart [a ?ParticleType].\n\
+    ?ParticleType rdfs:subClassOf nanomine:Particle; rdfs:label ?ParticleTypeLabel.\n\
+  }\n\
+  optional {\n\
+    ?composite sio:hasComponentPart [a ?PolymerType].\n\
+    ?PolymerType rdfs:subClassOf nanomine:Polymer; rdfs:label ?PolymerTypeLabel.\n\
+  }\n\
+  optional {\n\
+    ?composite sio:hasComponentPart/sio:isSurroundedBy [a ?SurfaceTreatmentType].\n\
+    ?SurfaceTreatmentType rdfs:subClassOf nanomine:SurfaceTreatment; rdfs:label ?SurfaceTreatmentTypeLabel.\n\
+  }\n\
+}';
     var cache = {};
     var nm = "http://nanomine.tw.rpi.edu/ns/";
 
@@ -179,7 +209,8 @@ select distinct ?composite ?ParticleType ?ParticleTypeLabel ?PolymerType ?Polyme
                 "http://nanomine.tw.rpi.edu/ns/PolymerNanocomposite" : {},
                 "http://nanomine.tw.rpi.edu/ns/Particle": {},
                 "http://nanomine.tw.rpi.edu/ns/Polymer" : {},
-                "http://nanomine.tw.rpi.edu/ns/SurfaceTreatment" : {}
+                "http://nanomine.tw.rpi.edu/ns/SurfaceTreatment" : {},
+                rows : []
             };
         }
         return cache[uri];
@@ -211,8 +242,9 @@ select distinct ?composite ?ParticleType ?ParticleTypeLabel ?PolymerType ?Polyme
                 return $q(function( resolve, reject) {
                     var composites = {};
                     data.data.results.bindings.forEach(function(row) {
+                        if (row.value.value == "None") return;
                         var composite = getComposite(row.composite.value);
-                        ['Polymer','SurfaceTreatment','Polymer'].forEach(function(t) {
+                        ['Particle','SurfaceTreatment','Polymer'].forEach(function(t) {
                             if (row[t+'Type'] && !composite[nm+t].type ) {
                                 composite[nm+t].type = {uri: row[t+'Type']};
                                 if (row[t+'TypeLabel']) {
@@ -223,32 +255,50 @@ select distinct ?composite ?ParticleType ?ParticleTypeLabel ?PolymerType ?Polyme
                             }
                         });
                         composite[row.materialType.value][row.type.value] = row.value;
-                        var unit = getUnit(row.unit.value, row.unitLabel.value);
-                        composite[row.materialType.value][row.type.value].unit = unit;
+                        if (row.unit && row.unitLabel) {
+                            var unit = getUnit(row.unit.value, row.unitLabel.value);
+                            composite[row.materialType.value][row.type.value].unit = unit;
+                        }
+                        composite.rows.push(row);
                         composites[row.composite.value] = composite;
                     });
                     var groupMap = {}, result = [];
+                    console.log(composites);
                     result.config = vizconfig;
                     d3.values(composites).forEach(function(composite) {
                         var groupBy = composite[vizconfig.groupBy.materialType][vizconfig.groupBy.type];
-                        if (!groupMap[groupBy.materialType]) {
-                            groupMap[groupBy.materialType] = {
+                        if (!groupBy || !groupBy.uri) {
+                            groupBy = {
+                                label: "",
+                                uri: "None"
+                            };
+                        }
+                        if (!groupMap[groupBy.uri]) {
+                            groupMap[groupBy.uri] = {
                                 key : groupBy.label,
                                 group: groupBy,
                                 values: []
                             };
-                            result.push(groupMap[groupBy.materialType]);
+                            result.push(groupMap[groupBy.uri]);
                         }
                         var value = {
                             entity : composite
                         }
+                        var complete = true;
                         dimensions.forEach(function(dim) {
-                            if (vizconfig[dim] && composite[vizconfig[dim].materialType][vizconfig[dim].type]) {
-                                value[dim] = composite[vizconfig[dim].materialType][vizconfig[dim].type].value;
-                                vizconfig[dim].unit = composite[vizconfig[dim].materialType][vizconfig[dim].type].unit;
+                            if (vizconfig[dim]) {
+                                if (composite[vizconfig[dim].materialType][vizconfig[dim].type]) {
+                                    value[dim] = composite[vizconfig[dim].materialType][vizconfig[dim].type].value;
+                                    vizconfig[dim].unit = composite[vizconfig[dim].materialType][vizconfig[dim].type].unit;
+                                } else {
+                                    complete = false;
+                                }
                             }
                         });
-                        groupMap[groupBy.materialType].values.push(value);
+                        if (complete) {
+                            //console.log(value);
+                            groupMap[groupBy.uri].values.push(value);
+                        }
                     });
                     resolve(result);
                 });
@@ -257,23 +307,51 @@ select distinct ?composite ?ParticleType ?ParticleTypeLabel ?PolymerType ?Polyme
     return fn;
 }]);
 
-nanomineD3.factory('loadAttributes', ['$http', 'conf', '$q', function($http, conf, $q) {
-    var query = 'prefix nanomine: <http://nanomine.tw.rpi.edu/ns/>\
-prefix sio: <http://semanticscience.org/resource/>\
-select distinct ?type (count(?composite) as ?count) (sample(?label) as ?label) ?materialType (sample(?materialTypeLabel) as ?materialTypeLabel) ?unit (sample(?unitLabel) as ?unitLabel) where {\
-  ?composite a nanomine:PolymerNanocomposite.\
-    ?composite sio:hasComponentPart?/sio:isSurroundedBy? ?p.\
-  ?p a ?materialType.\
-  ?p sio:hasAttribute ?attr.\
-  ?attr a ?type.\
-  ?attr sio:hasValue ?value.\
-  optional { ?attr sio:hasUnit ?unit. ?unit rdfs:label ?unitLabel}\
-  optional { ?type rdfs:label ?label}\
-  optional { ?materialType rdfs:label ?materialTypeLabel }\
-  optional { ?sc rdfs:subClassOf ?materialType}\
-  filter(!BOUND(?sc))\
+nanomineD3.factory('loadAttributes', ['$http', 'conf', '$q', "sparqlValuesBinder", function($http, conf, $q, sparqlValuesBinder) {
+    var unconstrainedQuery = 'prefix nanomine: <http://nanomine.tw.rpi.edu/ns/>\n\
+prefix sio: <http://semanticscience.org/resource/>\n\
+prefix prov: <http://www.w3.org/ns/prov#>\n\
+select distinct ?type (count(?c) as ?count) (sample(?label) as ?label) ?materialType (sample(?materialTypeLabel) as ?materialTypeLabel) ?unit (sample(?unitLabel) as ?unitLabel) where {\n\
+  ?c a nanomine:PolymerNanocomposite.\n\
+  ?c prov:specializationOf?/sio:hasComponentPart?/sio:isSurroundedBy? ?p.\n\
+  ?p a ?materialType.\n\
+  ?p sio:hasAttribute ?attr.\n\
+  ?attr a ?type.\n\
+  ?attr sio:hasValue ?value.\n\
+  optional { ?attr sio:hasUnit ?unit. ?unit rdfs:label ?unitLabel}\n\
+  optional { ?type rdfs:label ?label}\n\
+  optional { ?materialType rdfs:label ?materialTypeLabel }\n\
+  optional { ?sc rdfs:subClassOf ?materialType}\n\
+  filter(!BOUND(?sc))\n\
 } group by ?type ?materialType ?unit order by desc(?count)';
-    function fn() {
+
+    var constrainedQuery = 'prefix nanomine: <http://nanomine.tw.rpi.edu/ns/>\n\
+prefix sio: <http://semanticscience.org/resource/>\n\
+prefix prov: <http://www.w3.org/ns/prov#>\n\
+select distinct ?type (count(?c) as ?count) (sample(?label) as ?label) ?materialType (sample(?materialTypeLabel) as ?materialTypeLabel) ?unit (sample(?unitLabel) as ?unitLabel) where {\n\
+  ?c a nanomine:PolymerNanocomposite.\n\
+  ?c prov:specializationOf?/sio:hasComponentPart?/sio:isSurroundedBy? ?p.\n\
+  ?p a ?materialType.\n\
+  ?p sio:hasAttribute ?attr.\n\
+  ?attr a ?type.\n\
+  ?attr sio:hasValue ?value.\n\
+  optional { ?attr sio:hasUnit ?unit. ?unit rdfs:label ?unitLabel}\n\
+  optional { ?type rdfs:label ?label}\n\
+  optional { ?materialType rdfs:label ?materialTypeLabel }\n\
+  optional { ?sc rdfs:subClassOf ?materialType}\n\
+  ?c prov:specializationOf?/sio:hasComponentPart?/sio:isSurroundedBy? [\n\
+    a ?selectedMaterialType; sio:hasAttribute [a ?selectedType]\n\
+  ].\n\
+  filter(!BOUND(?sc))\n\
+} group by ?type ?materialType ?unit order by desc(?count)';
+    function fn(otherVariable) {
+        var query = unconstrainedQuery;
+        console.log(otherVariable);
+        if (otherVariable) {
+            query = constrainedQuery + sparqlValuesBinder([otherVariable],
+                                                          [['materialType','selectedMaterialType'],['type','selectedType']]);
+        }
+        console.log(query);
         return $http.get(conf.endpoint, {params : {query : query, output: 'json'}, responseType: 'json'})
             .then(function(data) {
                 return $q(function( resolve, reject) {
@@ -284,6 +362,7 @@ select distinct ?type (count(?composite) as ?count) (sample(?label) as ?label) ?
                             materialType: row.materialType.value,
                             materialTypeLabel: row.materialTypeLabel.value,
                             count: row.count.value,
+                            id: [row.type.value, row.materialType.value].join(' '),
                             attrType: "quantity"
                         }
                         if (row.unit) {
@@ -302,6 +381,7 @@ select distinct ?type (count(?composite) as ?count) (sample(?label) as ?label) ?
                      ["http://nanomine.tw.rpi.edu/ns/SurfaceTreatment", "Surface Treatment"]]
                         .forEach(function(row) {
                             result.push({
+                                id : [row[0] , 'type'].join(" "),
                                 type : 'type',
                                 typeLabel : "Type",
                                 materialType: row[0],

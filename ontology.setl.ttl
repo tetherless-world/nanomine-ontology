@@ -89,6 +89,7 @@
   "skos" :    "http://www.w3.org/2004/02/skos/core#",
   "prov" :    "http://www.w3.org/ns/prov#",
   "dc"   :    "http://purl.org/dc/terms/",
+  "dcterms"   :    "http://purl.org/dc/terms/",
   "cmo"  :    "http://purl.org/twc/ontologies/cmo.owl#",
   "owl": "http://www.w3.org/2002/07/owl#",
   "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
