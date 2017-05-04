@@ -19,3 +19,153 @@
 
 : a owl:Ontology.
 
+# Metals Processing
+:MetalsProcessing a owl:Class; rdfs:subClassOf sio:Method.
+:Heating a owl:Class; rdfs:subClassOf sio::MetalsProcessing.
+:Casting a owl:Class; rdfs:subClassOf sio::MetalsProcessing.
+#  Inputs: melt temperature, cooling rate, temperature field
+#  Property Engineered: grain size, relates to strength, creep resistance
+#  Freezing front tends to affect the grain size
+:Deforming a owl:Class; rdfs:subClassOf sio::MetalsProcessing.
+#  Inputs: processes, tool shapes, temperature history, current temperature of the metal during deformation
+#  Property Engineered: geometry, microstructure (engineering properties), surface finish
+:Cutting a owl:Class; rdfs:subClassOf sio::MetalsProcessing.
+#  Inputs: tool geometry, speeds, depth of cut, lubricant
+#  Property Engineered: surface finish, near surface microstructure
+:HeatTreatment a owl:Class; rdfs:subClassOf sio::MetalsProcessing.
+#Input controls: temperature history
+#property: microstructure (ductility, strength, fracture toughness)
+
+:Joining a owl:Class, rdfs:subClassOf :MetalsProcessing.
+:Bolting a owl:Class, rdfs:subClassOf :Joining.
+:Welding a owl:Class, rdfs:subClassOf :Joining.
+:Riveting a owl:Class, rdfs:subClassOf :Joining.
+:Soldering a owl:Class, rdfs:subClassOf :Joining.
+
+:Microstructure a owl:Class; rdfs:subClassOf sio:Quality
+:Grain rdfs:subClassOf :Microstructure
+
+# Glass Processing
+:GlassProcessing a owl:Class; rdfs:subClassOf sio:Method.
+:Viscosity rdfs:subClassOf sio:Quantity.
+:Temperature rdfs:subClassOf sio:Quantity.
+#Viscosity in relation to temperature
+# Old:
+:LongGlass
+:ShortGlass
+# New:
+StrongGlass # Not actually strength
+FragileGlass
+:GlassTransitionTemperature
+
+:Melting
+ # needs homogeneous, clear glass
+ # no bubbles (fining) 
+ # removal of bubbles can be done by fining agents or by mechanical stirring or evacuation
+Forming
+  Plates # created by float method, on molten Tin bath in N2 gas atmosphere
+  Fibers # glass melt is passed through a platinum sheet with thousands of holes about 10 um range
+    Core: ~8 um in diameter
+    Cladding: 125 um diameter
+    Covered in blastic coating
+    n_core > n_cladding produces total internal reflection
+    low optical loss achieved by reducing impurities
+  Tubes
+  Lens
+  Bottles
+  others
+Cooling
+Annealing # All but fibers (removal of residual stress)
+  # Heat treatment at glass transition temperature
+Strengthening # (Physical tempering?)
+  # heat up to 300 C, differential temperature results in compressive stress on the outside
+  # chemical tempering: ion exchange (gorilla glass)
+  # can be used to create a refractive difference.
+Coating
+
+:ConcreteProcessing
+:Concrete rdfs:subClassOf :CeramicParticulateComposite.
+  sio:hasPart :Cement, :Aggregate, water, admixtures, fibers
+
+quasi-brittle, addititives and fibers can modify to plastic or strain hardening.
+
+CementProduction
+:Cement
+  Lime Stone, Silica, Alumina, Gypsum
+Produces CO2 through oxidation of Limestone
+Gypsum provides additional calcium
+
+Input Parameters:
+  Mixing Temperature
+  Minerals Content
+  CementParticleSize
+
+Properties 
+  Controlled:
+    Alkali Content
+    Fineness
+    Chemical Composition
+  Influenced:
+    Deterioration
+
+
+Mixing
+  Fiber inclusion: clustering, dispersion
+  Temperature Workbility, Flowability
+  Mixing Time 
+  Mixing Sequence (dispersion of components)
+  HYdration Heat Curve
+    Dormancy (mixing, transport, and placing)
+    Initial Set
+    Hydration Acceleration
+    Strength Stress Development
+    Hydration deceleration
+Transport
+  Additives: polymers that neutralize charge on cement particles that prevent setting and hydration reaction
+    Retardants
+    Super-plasticizer (flowability, homogenenaity)
+Placing
+  Pumping (needs super-plasticizers)
+  Casting
+  Compaction (vibration)
+  Surface treatment
+Curing
+  prevent moisture loss
+  heat management
+Asphalt Concrete
+  mixing plan is the same
+  binder is viscoelastic material (petrolium extract)
+
+PolymerProcessing
+  Extrusion
+Solid polymer -> heated barrel with screw (shears material, forces extrusion) (need to balance temperature and shear rate along the barrel)-> pressure flow 
+    Blown film manufacture - pressure of air determines 
+Injection Molding
+  Starts with extruder, force polymer into mold
+  Parameters: temperature of the mold, pressure of the runner (channels to fill the mold)
+  Results: residual stress, incomplete filling, crystal size
+Properties:
+Viscosity (function of temperature and strain rate (shear rate))
+Morphology development (semicrystalline, amorphous)
+Linear or crosslinked final polymer
+
+RotationalMolding 
+beads are melted and stick to inside surface of mold (trash cans, etc)
+
+BlowMolding
+Extruder, compressed air, mold around the cylinder
+
+Thermoforming
+  VaccumForming
+    StraightVaccumForming
+    DrapeVacuumForming
+
+Parameters:
+:Temperature
+:ShearRate
+:ShearStress
+:Pressure
+:TotalEnergyInput
+:CoolingRate
+:PartShape (non-uniform residual stresses)
+:DrawRatio (how much strain occurs after solification)
