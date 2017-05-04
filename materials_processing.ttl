@@ -21,18 +21,18 @@
 
 # Metals Processing
 :MetalsProcessing a owl:Class; rdfs:subClassOf sio:Method.
-:Heating a owl:Class; rdfs:subClassOf sio::MetalsProcessing.
-:Casting a owl:Class; rdfs:subClassOf sio::MetalsProcessing;
-rdfs:comment  '''Inputs: melt temperature, cooling rate, temperature field.
+:Heating a owl:Class; rdfs:subClassOf :MetalsProcessing.
+:Casting a owl:Class; rdfs:subClassOf :MetalsProcessing;
+rdfs:comment '''Inputs: melt temperature, cooling rate, temperature field.
 Property Engineered: grain size, relates to strength, creep resistance.
 Freezing front tends to affect the grain size.'''.
-:Deforming a owl:Class; rdfs:subClassOf sio::MetalsProcessing;
+:Deforming a owl:Class; rdfs:subClassOf :MetalsProcessing;
  rdfs:comment '''Inputs: processes, tool shapes, temperature history, current temperature of the metal during deformation.
 Property Engineered: geometry, microstructure (engineering properties), surface finish.'''.
-:Cutting a owl:Class; rdfs:subClassOf sio::MetalsProcessing;
+:Cutting a owl:Class; rdfs:subClassOf :MetalsProcessing;
 rdfs:comment '''Inputs: tool geometry, speeds, depth of cut, lubricant.
 Property Engineered: surface finish, near surface microstructure.'''.
-:HeatTreatment a owl:Class; rdfs:subClassOf sio::MetalsProcessing;
+:HeatTreatment a owl:Class; rdfs:subClassOf :MetalsProcessing;
 rdfs:comment '''Input controls: temperature history.
 property: microstructure (ductility, strength, fracture toughness)'''.
 
