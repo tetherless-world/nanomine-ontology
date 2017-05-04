@@ -35,11 +35,11 @@ Property Engineered: surface finish, near surface microstructure.'''.
 rdfs:comment '''Input controls: temperature history.
 property: microstructure (ductility, strength, fracture toughness)'''.
 
-:Joining a owl:Class, rdfs:subClassOf :MetalsProcessing.
-:Bolting a owl:Class, rdfs:subClassOf :Joining.
-:Welding a owl:Class, rdfs:subClassOf :Joining.
-:Riveting a owl:Class, rdfs:subClassOf :Joining.
-:Soldering a owl:Class, rdfs:subClassOf :Joining.
+:Joining a owl:Class; rdfs:subClassOf :MetalsProcessing.
+:Bolting a owl:Class; rdfs:subClassOf :Joining.
+:Welding a owl:Class; rdfs:subClassOf :Joining.
+:Riveting a owl:Class; rdfs:subClassOf :Joining.
+:Soldering a owl:Class; rdfs:subClassOf :Joining.
 
 :Microstructure a owl:Class; rdfs:subClassOf sio:Quality.
 :Grain rdfs:subClassOf :Microstructure.
