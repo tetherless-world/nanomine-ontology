@@ -32,7 +32,7 @@ Property Engineered: geometry, microstructure (engineering properties), surface 
 :Cutting a owl:Class; rdfs:subClassOf sio::MetalsProcessing;
 rdfs:comment '''Inputs: tool geometry, speeds, depth of cut, lubricant.
 Property Engineered: surface finish, near surface microstructure.'''.
-:HeatTreatment a owl:Class; rdfs:subClassOf sio::MetalsProcessing.
+:HeatTreatment a owl:Class; rdfs:subClassOf sio::MetalsProcessing;
 rdfs:comment '''Input controls: temperature history.
 property: microstructure (ductility, strength, fracture toughness)'''.
 
