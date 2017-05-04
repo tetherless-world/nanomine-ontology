@@ -22,8 +22,7 @@
 # Metals Processing
 :MetalsProcessing a owl:Class; rdfs:subClassOf sio:Method.
 :Heating a owl:Class; rdfs:subClassOf :MetalsProcessing.
-:Casting a owl:Class; rdfs:subClassOf :MetalsProcessing;
-rdfs:comment '''Inputs: melt temperature, cooling rate, temperature field.
+:Casting a owl:Class; rdfs:subClassOf :MetalsProcessing; rdfs:comment '''Inputs: melt temperature, cooling rate, temperature field.
 Property Engineered: grain size, relates to strength, creep resistance.
 Freezing front tends to affect the grain size.'''.
 :Deforming a owl:Class; rdfs:subClassOf :MetalsProcessing;
