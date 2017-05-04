@@ -330,14 +330,14 @@ sio:hasPart :CreateCADGeometry, :ConvertToSTLFile, :SliceSTLFileIntoLayers, :Bui
 
 :EnergyDelivery a owl:Class.
   :Laser a owl:Class; rdfs:subClasOf :EnergyDelivery.
-  :Electron Beam a owl:Class; rdfs:subClasOf :EnergyDelivery.
+  :ElectronBeam a owl:Class; rdfs:subClasOf :EnergyDelivery.
   :Heat a owl:Class; rdfs:subClasOf :EnergyDelivery.
   :UVLightCuring a owl:Class; rdfs:subClasOf :EnergyDelivery.
 
 :PolymerAdditiveManufacturing a owl:Class; rdfs:subClasOf :AdditiveManufacturing.
 :MetalAdditiveManufacturing a owl:Class; rdfs:subClasOf :AdditiveManufacturing.
   :SelectiveLaserSintering a owl:Class; rdfs:subClasOf :MetalAdditiveManufacturing;
-    sio:hasPart :MaterialDeposition, :Sintering
+    sio:hasPart :MaterialDeposition, :Sintering.
     :SelectiveLaserMelting a owl:Class; rdfs:subClasOf :SelectiveLaserSintering.
     :EBeam a owl:Class; rdfs:subClasOf :SelectiveLaserSintering.
 
