@@ -348,8 +348,8 @@ sio:hasPart :CreateCADGeometry, :ConvertToSTLFile, :SliceSTLFileIntoLayers, :Bui
 
 :ElectrochemicalProcessing rdfs:subClassOf sio:Method; 
 rdfs:comment '''
-:AnodicReaction '''metal going into solution'''
-:CathodicReaction '''metal coming out of solution'''
+:AnodicReaction 'metal going into solution'
+:CathodicReaction 'metal coming out of solution'
 :Electrodeposition
   Plating to electronic structures
   microstructural control
