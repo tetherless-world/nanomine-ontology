@@ -12,7 +12,8 @@ String.prototype.unCamelCase = function(){
 
 var nanomineD3 = angular.module('adf.widget.nanomine-d3', ['adf.provider', 'nvd3']);
 
-nanomineD3.value('nanomineEndpoint', "http://nanomine.northwestern.edu:8001/blazegraph/sparql");
+//nanomineD3.value('nanomineEndpoint', "http://nanomine.northwestern.edu:8001/blazegraph/sparql");
+nanomineD3.value('nanomineEndpoint', "http://localhost:9999/blazegraph/sparql");
 
 function appendTransform(defaults, transform) {
 
@@ -141,7 +142,8 @@ nanomineD3.controller('nanomineD3EditController', [
 
 nanomineD3.factory('conf', function() {
     var config = {
-        endpoint : "http://nanomine.northwestern.edu:8001/blazegraph/sparql"
+//        endpoint : "http://nanomine.northwestern.edu:8001/blazegraph/sparql"
+        endpoint : "http://localhost:9999/blazegraph/sparql"
     };
     return config;
 })
@@ -166,8 +168,12 @@ nanomineD3.factory('loadData', ['$http', 'conf', '$q', function($http, conf, $q)
     var query = 'prefix nanomine: <http://nanomine.tw.rpi.edu/ns/>\n\
 prefix sio: <http://semanticscience.org/resource/>\n\
 prefix prov: <http://www.w3.org/ns/prov#>\n\
-select distinct ?composite ?ParticleType ?ParticleTypeLabel ?PolymerType ?PolymerTypeLabel ?SurfaceTreatmentType ?SurfaceTreatmentTypeLabel ?type ?materialType ?value ?unit where {\n\
-  ?p a ?materialType.\n\
+select distinct ?composite ?ParticleType ?ParticleTypeLabel ?PolymerType ?PolymerTypeLabel ?SurfaceTreatmentType ?SurfaceTreatmentTypeLabel ?type ?materialType ?value ?unit ?generalization where {\n\
+  {\n\
+    ?p sio:hasRole [ a ?materialType ; sio:inRelationTo ?composite].\n\
+  } union {\n\
+    ?p a ?materialType\n\
+  }\n\
   ?p sio:hasAttribute ?attr.\n\
   ?attr a ?type.\n\
   ?attr sio:hasValue ?value.\n\
@@ -177,16 +183,22 @@ select distinct ?composite ?ParticleType ?ParticleTypeLabel ?PolymerType ?Polyme
   ?composite a nanomine:PolymerNanocomposite.\n\
   ?composite prov:specializationOf?/sio:hasComponentPart?/sio:isSurroundedBy? ?p.\n\
   optional {\n\
-    ?composite prov:specializationOf?/sio:hasComponentPart [a ?ParticleType].\n\
-    ?ParticleType rdfs:subClassOf nanomine:Particle; rdfs:label ?ParticleTypeLabel.\n\
+    ?composite prov:specializationOf ?generalization.\n\
   }\n\
   optional {\n\
-    ?composite sio:hasComponentPart [a ?PolymerType].\n\
-    ?PolymerType rdfs:subClassOf nanomine:Polymer; rdfs:label ?PolymerTypeLabel.\n\
+    ?composite prov:specializationOf?/sio:hasComponentPart ?filler.\n\
+    ?filler a ?ParticleType; sio:hasRole [a nanomine:Filler].\n\
+    ?ParticleType rdfs:label ?ParticleTypeLabel.\n\
   }\n\
   optional {\n\
-    ?composite sio:hasComponentPart/sio:isSurroundedBy [a ?SurfaceTreatmentType].\n\
-    ?SurfaceTreatmentType rdfs:subClassOf nanomine:SurfaceTreatment; rdfs:label ?SurfaceTreatmentTypeLabel.\n\
+    ?composite prov:specializationOf?/sio:hasComponentPart ?matrix.\n\
+    ?matrix a ?PolymerType; sio:hasRole [a nanomine:Matrix].\n\
+    ?PolymerType rdfs:label ?PolymerTypeLabel.\n\
+  }\n\
+  optional {\n\
+    ?composite prov:specializationOf?/sio:hasComponentPart/sio:isSurroundedBy ?surfaceTreatment.\n\
+    ?surfaceTreatment a ?SurfaceTreatmentType; sio:hasRole [a nanomine:SurfaceTreatment].\n\
+    ?SurfaceTreatmentType rdfs:label ?SurfaceTreatmentTypeLabel.\n\
   }\n\
 }';
     var cache = {};
@@ -314,7 +326,12 @@ prefix prov: <http://www.w3.org/ns/prov#>\n\
 select distinct ?type (count(?c) as ?count) (sample(?label) as ?label) ?materialType (sample(?materialTypeLabel) as ?materialTypeLabel) ?unit (sample(?unitLabel) as ?unitLabel) where {\n\
   ?c a nanomine:PolymerNanocomposite.\n\
   ?c prov:specializationOf?/sio:hasComponentPart?/sio:isSurroundedBy? ?p.\n\
-  ?p a ?materialType.\n\
+  {\n\
+    ?p sio:hasRole [ a ?materialType ; sio:inRelationTo ?composite].\n\
+  } union {\n\
+    ?p a nanomine:PolymerNanocomposite.\n\
+    BIND(nanomine:PolymerNanocomposite as ?materialType)\n\
+  }\n\
   ?p sio:hasAttribute ?attr.\n\
   ?attr a ?type.\n\
   ?attr sio:hasValue ?value.\n\
@@ -331,8 +348,12 @@ prefix prov: <http://www.w3.org/ns/prov#>\n\
 select distinct ?type (count(?c) as ?count) (sample(?label) as ?label) ?materialType (sample(?materialTypeLabel) as ?materialTypeLabel) ?unit (sample(?unitLabel) as ?unitLabel) where {\n\
   ?c a nanomine:PolymerNanocomposite.\n\
   ?c prov:specializationOf?/sio:hasComponentPart?/sio:isSurroundedBy? ?p.\n\
-  ?p a ?materialType.\n\
-  ?p sio:hasAttribute ?attr.\n\
+  {\n\
+    ?p sio:hasRole [ a ?materialType ; sio:inRelationTo ?composite].\n\
+  } union {\n\
+    ?p a nanomine:PolymerNanocomposite.\n\
+    BIND(nanomine:PolymerNanocomposite as ?materialType)\n\
+  }  ?p sio:hasAttribute ?attr.\n\
   ?attr a ?type.\n\
   ?attr sio:hasValue ?value.\n\
   optional { ?attr sio:hasUnit ?unit. ?unit rdfs:label ?unitLabel}\n\

@@ -23,6 +23,54 @@ prov = Namespace('http://www.w3.org/ns/prov#')
 dc = Namespace('http://purl.org/dc/terms/')
 pv = Namespace('http://purl.org/net/provenance/ns#')
 
+import time
+import requests, json, os
+import dicttoxml
+from xml.dom.minidom import parseString
+import codecs
+
+
+current_schema_objectID = '5904922ce74a1d36e1b78b7f' # 042917
+
+def download_xml():
+    '''
+    Connect to API via URL and grab json and xml files for given schemaID. 
+    '''
+
+    # create dirs if not exist
+    for directory in ['json_api', XML_DIR]:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+    # API backup
+    MDCS_URL = "http://129.105.90.149:8000"
+
+    url = MDCS_URL + "/rest/explore/select/all"
+    payload = {'dataformat':'json'}
+    r = requests.get(url, params=payload)
+    data = r.json()
+
+    ct = 0
+    for doc in data:
+        ct += 1
+        title = doc['title']
+        schema = doc[u'schema']
+        if schema == current_schema_objectID: 
+            id = doc[u'_id']
+
+            # save json 
+            with open('./json_api/json-'+str(title)+'-'+str(schema)+'-'+str(id)+'.json', 'w+') as outfile:
+                json.dump(doc['content'], outfile)
+
+            # convert to xml 
+            data_xml = dicttoxml.dicttoxml(doc['content']['PolymerNanocomposite'], custom_root='PolymerNanocomposite',attr_type=False)
+
+            # save 
+            xml_path = XML_DIR+str(title)+'-'+str(schema)+'-'+str(id)+'.xml'
+            with codecs.open(xml_path, 'w', "utf-8") as _f:
+                _f.write("%s\n" % (parseString(data_xml).toprettyxml())[23:])
+
+    print 'total number of docs: ' + str(ct)
 
 def convert_xml(debug=None):
     setl_graph = Graph()

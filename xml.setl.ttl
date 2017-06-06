@@ -78,17 +78,27 @@
                   "nanomine:PolymerNanocomposite"
                 ],
                 "sio:hasComponentPart" : [
-                  { "@for" : "particle in row.findall('MATERIALS/Particle')",
+                  { "@for" : "fc, particle in enumerate(row.findall('MATERIALS/Filler/FillerComponent'))",
                     "@do" : {
-                      "@id" : "sample:{{slugify(id.text)}}_particle",
-                      "@type" : ["nanomine:Particle",
+                      "@id" : "sample:{{slugify(id.text)}}_filler_{{fc}}",
+                      "@type" : [
                         {
-                          "@id" : "compound:{{slugify(particle.find('ChemicalName').text)}}",
+                          "@if" : "particle.find('ChemicalName').text is not None",
+                          "@id" : "compound:{{camelcase(particle.find('ChemicalName').text)}}",
                           "@type" : "owl:Class",
-                          "rdfs:subClassOf" : {"@id":"nanomine:Particle"},
                           "rdfs:label" : "{{particle.find('ChemicalName').text}}"
+                        },
+                        {
+                          "@if" : "particle.find('ChemicalName').text is None",
+                          "@id" : "compound:{{camelcase(particle.find('Abbreviation').text)}}",
+                          "@type" : "owl:Class",
+                          "rdfs:label" : "{{particle.find('Abbreviation').text}}"
                         }
                       ],
+                      "sio:hasRole" : {
+                        "@type" : "nanomine:Filler",
+                        "sio:inRelationTo" : { "@id" : "sample:{{slugify(id.text)}}"}
+                      },
                       "sio:hasAttribute" : [
                         {
                           "@if" : "particle.find('Density')",
@@ -108,18 +118,18 @@
                           }
                         },
                         {
-                          "@if" : "particle.find('SpecificSurfaceArea')",
+                          "@if" : "particle.find('SpecificSurfaceArea') is not None",
                           "@for" : "area in particle.findall('SpecificSurfaceArea')",
                           "@do" : {
                             "@type" : "sio:SurfaceArea",
                             "sio:hasValue" : {
-                                "@value" : "{{area.find('value/value').text}}",
+                                "@value" : "{{area.find('value').text}}",
                                 "@type" : "xsd:decimal"
                               },
                             "sio:hasUnit" : [
-                              { "@if" : "area.find('value/unit')",
-                                "@id" : "unit:{{slugify(area.find('value/unit').text)}}",
-                                "rdfs:label" : "{{area.find('value/unit').text}}"
+                              { "@if" : "area.find('unit') is not None",
+                                "@id" : "unit:{{slugify(area.find('unit').text)}}",
+                                "rdfs:label" : "{{area.find('unit').text}}"
                               }
                             ],
                             "sio:hasAttribute" : [
@@ -136,18 +146,17 @@
                           }
                         },
                         {
-                          "@if" : "particle.find('ParticleAspectRatio/FixedValue')",
-                          "@for" : "ratio in particle.findall('ParticleAspectRatio/FixedValue')",
+                          "@for" : "ratio in particle.findall('ParticleAspectRatio')",
                           "@do" : {
                             "@type" : "sio:AspectRatio",
                             "sio:hasValue" : {
-                                "@value" : "{{ratio.find('value/value').text}}",
+                                "@value" : "{{ratio.find('value').text}}",
                                 "@type" : "xsd:decimal"
                               },
                             "sio:hasUnit" : [
-                              { "@if" : "ratio.find('value/unit')",
-                                "@id" : "unit:{{slugify(ratio.find('value/unit').text)}}",
-                                "rdfs:label" : "{{ratio.find('value/unit').text}}"
+                              { "@if" : "ratio.find('unit') is not None",
+                                "@id" : "unit:{{slugify(ratio.find('unit').text)}}",
+                                "rdfs:label" : "{{ratio.find('unit').text}}"
                               }
                             ],
                             "sio:hasAttribute" : [
@@ -164,23 +173,22 @@
                           }
                         },
                         {
-                          "@if" : "particle.find('ParticleSize/FixedValue')",
-                          "@for" : "size in particle.findall('ParticleSize/FixedValue')",
+                          "@for" : "size in particle.findall('ParticleSize')",
                           "@do" : {
                             "@type" : "sio:Width",
                             "sio:hasValue" : {
-                                "@value" : "{{size.find('value/value').text}}",
+                                "@value" : "{{size.find('value').text}}",
                                 "@type" : "xsd:decimal"
                               },
                             "sio:hasUnit" : [
-                              { "@if" : "size.find('value/unit')",
-                                "@id" : "unit:{{slugify(size.find('value/unit').text)}}",
-                                "rdfs:label" : "{{size.find('value/unit').text}}"
+                              { "@if" : "size.find('unit') is not None",
+                                "@id" : "unit:{{slugify(size.find('unit').text)}}",
+                                "rdfs:label" : "{{size.find('unit').text}}"
                               }
                             ],
                             "sio:hasAttribute" : [
                               {
-                                "@if" : "size.find('.//uncertainty')",
+                                "@if" : "size.find('.//uncertainty') is not None",
                                 "@type" : [
                                   "sio:UncertaintyValue",
                                   { "@if" : "size.find('.//uncertainty/type').text == 'fraction'", "@id" : "sio:Ratio" },
@@ -192,7 +200,6 @@
                           }
                         },
                         {
-                          "@if" : "particle.find('CrystalPhase')",
                           "@for" : "phase in particle.findall('CrystalPhase')",
                           "@do" : {
                             "@type" : [
@@ -208,34 +215,53 @@
                         }
                       ],
                       "sio:isSurroundedBy" : [
-                        { "@for" : "surface in row.findall('MATERIALS/ParticleSurfaceTreatment')",
+                        { "@for" : "surface in particle.findall('ParticleSurfaceTreatment/item') if len(particle.findall('ParticleSurfaceTreatment/item')) > 0 else particle.findall('ParticleSurfaceTreatment')",
                           "@do" : {
-                            "@id" : "sample:{{slugify(id.text)}}_surfacetreatment",
+                            "@id" : "sample:{{slugify(id.text)}}_filler_{{fc}}_surfacetreatment",
                             "@type" : [
-                              "nanomine:SurfaceTreatment",
                               {
+                                "@if" : "surface.find('ChemicalName').text is not None",
                                 "@id" : "compound:{{camelcase(surface.find('ChemicalName').text)}}",
                                 "@type" : "owl:Class",
-                                "rdfs:subClassOf" : {"@id":"nanomine:SurfaceTreatment"},
                                 "rdfs:label" : "{{surface.find('ChemicalName').text}}"
+                              },
+                              {
+                                "@if" : "surface.find('ChemicalName').text is None",
+                                "@id" : "compound:{{camelcase(surface.find('Abbreviation').text)}}",
+                                "@type" : "owl:Class",
+                                "rdfs:label" : "{{surface.find('Abbreviation').text}}"
                               }
-                            ]
+                            ],
+                            "sio:hasRole" : {
+                              "@type" : "nanomine:SurfaceTreatment",
+                              "sio:inRelationTo" : {"@id":"sample:{{slugify(id.text)}}"}
+                            }
                           }
                         }
                       ]
                     }
                   },
-                  { "@for" : "polymer in row.findall('MATERIALS/Polymer')",
+                  { "@for" : "polymer in row.findall('MATERIALS/Matrix/MatrixComponent')",
                     "@do" : {
-                      "@id" : "sample:{{slugify(id.text)}}_polymer",
-                      "@type" : ["nanomine:Polymer",
+                      "@id" : "sample:{{slugify(id.text)}}_matrix",
+                      "@type" : [
                         {
+                          "@if" : "polymer.find('ChemicalName').text is not None",
                           "@id" : "compound:{{camelcase(polymer.find('ChemicalName').text)}}",
                           "@type" : "owl:Class",
-                          "rdfs:subClassOf" : {"@id":"nanomine:Polymer"},
                           "rdfs:label" : "{{polymer.find('ChemicalName').text}}"
+                        },
+                        {
+                          "@if" : "polymer.find('ChemicalName').text is None",
+                          "@id" : "compound:{{camelcase(polymer.find('Abbreviation').text)}}",
+                          "@type" : "owl:Class",
+                          "rdfs:label" : "{{polymer.find('Abbreviation').text}}"
                         }
-                      ]
+                      ],
+                      "sio:hasRole" : {
+                        "@type" : "nanomine:Matrix",
+                        "sio:inRelationTo" : {"@id":"sample:{{slugify(id.text)}}"}
+                      }
                     }
                   }
                 ],
@@ -245,19 +271,19 @@
                       "@for" : "i, property in properties.iterrows()",
                       "@do" : {
                          "@if" : "not isempty(property.xpath) and row.find('PROPERTIES')",
-                         "@for" : "table in row.find('PROPERTIES').findall('.'+property.xpath+'/data')",
+                         "@for" : "table in row.find('PROPERTIES').findall('.'+property.xpath+'//data')",
                          "@do" : {
-                             "@for" : "row in table.findall('rows/row')",
+                             "@for" : "row in table.findall('rows/row/item')",
                              "@do" : [
                                {
-                                 "@id" : "sample:{{slugify(id.text)}}_{{slugify(property.uri)}}_{{row.attrib['id']}}",
+                                 "@id" : "sample:{{slugify(id.text)}}_{{slugify(property.uri)}}_{{row.find('key').text}}",
                                  "@type" : [
                                    "nanomine:PolymerNanocomposite"
                                  ],
                                  "sio:hasAttribute" : [
                                    {
                                      "@type" : "{{property.uri}}",
-                                     "sio:hasValue" : { "@value" : "{{row.findall('column')[1].text}}", "@type": "xsd:decimal"}
+                                     "sio:hasValue" : { "@value" : "{{row.findall('column/item/key')[2].text}}", "@type": "xsd:decimal"}
                                    },
                                    {
                                      "@type" : [
@@ -267,13 +293,13 @@
                                        },
                                        {
                                          "@if" : "isempty(property.curveIndependentVar)",
-                                         "@id" : "nanomine:{{camelcase(table.findall('headers/column')[0].text)}}",
+                                         "@id" : "nanomine:{{camelcase(table.findall('headers/column/item/key')[0].text)}}",
                                          "@type" : "owl:Class",
                                          "rdfs:subClassOf" : {"@id" : "sio:Quantity"},
-                                         "rdfs:label" : "{{table.findall('headers/column')[0].text}}"
+                                         "rdfs:label" : "{{table.findall('headers/column/item/key')[0].text}}"
                                        }
                                      ],
-                                     "sio:hasValue" : { "@value" : "{{row.findall('column')[0].text}}", "@type": "xsd:decimal"}
+                                     "sio:hasValue" : { "@value" : "{{row.findall('column/item/key')[0].text}}", "@type": "xsd:decimal"}
                                    }
                                  ]
                                }
@@ -293,40 +319,32 @@
                        {
                         "@type" : "{{property.uri}}",
                         "dc:description" : [
-                          { "@if" : "value.find('description')", "@value" : "{{value.find('description').text}}"},
-                          { "@if" : "value.find('.Description')", "@value" : "{{value.find('Description').text}}"}
+                          { "@if" : "value.find('description') is not None", "@value" : "{{value.find('description').text}}"}
                         ],
                         "sio:hasValue" : [
                           {
-                            "@if" : "value.find('.//FixedValue')",
-                            "@value" : "{{value.find('.//FixedValue/value/value').text}}",
-                            "@type" : "xsd:decimal"
-                          },
-                          {
-                            "@if" : "value.find('temperature')",
-                            "@value" : "{{value.find('temperature').text}}",
+                            "@if" : "value.find('value') is not None",
+                            "@value" : "{{value.find('value').text}}",
                             "@type" : "xsd:decimal"
                           }
                         ],
                         "sio:hasUnit" : [
-                          { "@if" : "value.find('.//FixedValue')",
-                            "@id" : "unit:{{slugify(value.find('.//value/unit').text)}}",
-                            "rdfs:label" : "{{value.find('.//value/unit').text}}"
-                          },
-                          { "@if" : "value.find('unit')",
+                          { "@if" : "value.find('unit') is not None",
                             "@id" : "unit:{{slugify(value.find('unit').text)}}",
                             "rdfs:label" : "{{value.find('unit').text}}"
                           }
                         ],
                         "sio:hasAttribute" : [
                           {
-                            "@if" : "value.find('.//uncertainty')",
-                            "@type" : [
-                              "sio:UncertaintyValue",
-                              { "@if" : "value.find('.//uncertainty/type').text == 'fraction'", "@id" : "sio:Ratio" },
-                              { "@if" : "value.find('.//uncertainty/type').text == 'amount'", "@id" : "sio:StandardDeviation" }
-                            ],
-                            "sio:hasValue" : { "@value" : "{{value.find('.//uncertainty/value').text}}", "@type" : "xsd:decimal"}
+                            "@for" : "uncertainty in value.findall('uncertainty')",
+                            "@do" : {
+                              "@type" : [
+                                "sio:UncertaintyValue",
+                                { "@if" : "uncertainty.find('type').text == 'fraction'", "@id" : "sio:Ratio" },
+                                { "@if" : "uncertainty.find('type').text == 'amount'", "@id" : "sio:StandardDeviation" }
+                              ],
+                              "sio:hasValue" : { "@value" : "{{uncertainty.find('value').text}}", "@type" : "xsd:decimal"}
+                            }
                           }
                         ]
                        }
@@ -387,7 +405,7 @@
                         },
                         "dcterms:creator" : [
                           {
-                            "@for" : "author in citation.findall('CommonFields/Author')",
+                            "@for" : "author in citation.findall('CommonFields/Author/item')",
                             "@do" : 
                               {
                                 "@id" : "author:{{slugify(author.text)}}",
