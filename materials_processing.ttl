@@ -1,0 +1,406 @@
+@prefix rdf:           <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:          <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:           <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:           <http://www.w3.org/2002/07/owl#> .
+@prefix skos:          <http://www.w3.org/2004/02/skos/core#> .
+@prefix prov:          <http://www.w3.org/ns/prov#> .
+@prefix sio:           <http://semanticscience.org/resource/> .
+@prefix dcat:          <http://www.w3.org/ns/dcat#> .
+@prefix dcterms:       <http://purl.org/dc/terms/> .
+@prefix void:          <http://rdfs.org/ns/void#> .
+@prefix foaf:          <http://xmlns.com/foaf/0.1/> .
+@prefix ov:            <http://open.vocab.org/terms/> .
+@prefix setl:          <http://purl.org/twc/vocab/setl/> .
+@prefix csvw:          <http://www.w3.org/ns/csvw#> .
+@prefix pv:            <http://purl.org/net/provenance/ns#>.
+@prefix bibo:          <http://purl.org/ontology/bibo/>.
+
+@prefix :              <http://tw.rpi.edu/ontology/materials_processing/> .
+
+: a owl:Ontology.
+
+# Metals Processing
+:MetalsProcessing a owl:Class; rdfs:subClassOf sio:Method.
+:Heating a owl:Class; rdfs:subClassOf :MetalsProcessing.
+:Casting a owl:Class; rdfs:subClassOf :MetalsProcessing; rdfs:comment '''Inputs: melt temperature, cooling rate, temperature field.
+Property Engineered: grain size, relates to strength, creep resistance.
+Freezing front tends to affect the grain size.'''.
+:Deforming a owl:Class; rdfs:subClassOf :MetalsProcessing;
+ rdfs:comment '''Inputs: processes, tool shapes, temperature history, current temperature of the metal during deformation.
+Property Engineered: geometry, microstructure (engineering properties), surface finish.'''.
+:Cutting a owl:Class; rdfs:subClassOf :MetalsProcessing;
+rdfs:comment '''Inputs: tool geometry, speeds, depth of cut, lubricant.
+Property Engineered: surface finish, near surface microstructure.'''.
+:HeatTreatment a owl:Class; rdfs:subClassOf :MetalsProcessing;
+rdfs:comment '''Input controls: temperature history.
+property: microstructure (ductility, strength, fracture toughness)'''.
+
+:Joining a owl:Class; rdfs:subClassOf :MetalsProcessing.
+:Bolting a owl:Class; rdfs:subClassOf :Joining.
+:Welding a owl:Class; rdfs:subClassOf :Joining.
+:Riveting a owl:Class; rdfs:subClassOf :Joining.
+:Soldering a owl:Class; rdfs:subClassOf :Joining.
+
+:Microstructure a owl:Class; rdfs:subClassOf sio:Quality.
+:Grain rdfs:subClassOf :Microstructure.
+
+# Glass Processing
+:GlassProcessing a owl:Class; rdfs:subClassOf sio:Method;
+rdfs:comment '''
+:Viscosity rdfs:subClassOf sio:Quantity.
+:Temperature rdfs:subClassOf sio:Quantity.
+#Viscosity in relation to temperature
+# Old:
+#:LongGlass
+#:ShortGlass
+# New:
+#StrongGlass # Not actually strength
+#FragileGlass
+:GlassTransitionTemperature a owl:Class; rdfs:subClassOf sio:Temperature.
+
+:Melting a owl:Class; rdfs:subClassOf :GlassProcessing.
+ # needs homogeneous, clear glass
+ # no bubbles (fining) 
+ # removal of bubbles can be done by fining agents or by mechanical stirring or evacuation
+:Forming a owl:Class; rdfs:subClassOf :GlassProcessing.
+  :Glass a owl:Class.
+  :Plates a owl:Classcreated by float method, on molten Tin bath in N2 gas atmosphere
+  Fibers # glass melt is passed through a platinum sheet with thousands of holes about 10 um range
+    Core: ~8 um in diameter
+    Cladding: 125 um diameter
+    Covered in blastic coating
+    n_core > n_cladding produces total internal reflection
+    low optical loss achieved by reducing impurities
+  Tubes
+  Lens
+  Bottles
+  others
+Cooling
+Annealing # All but fibers (removal of residual stress)
+  # Heat treatment at glass transition temperature
+Strengthening # (Physical tempering?)
+  # heat up to 300 C, differential temperature results in compressive stress on the outside
+  # chemical tempering: ion exchange (gorilla glass)
+  # can be used to create a refractive difference.
+Coating'''.
+
+:ConcreteProcessing a owl:Class; rdfs:subClassOf sio:Method;
+rdfs:comment ''':Concrete rdfs:subClassOf :CeramicParticulateComposite.
+  sio:hasPart :Cement, :Aggregate, water, admixtures, fibers
+
+quasi-brittle, addititives and fibers can modify to plastic or strain hardening.
+
+CementProduction
+:Cement
+  Lime Stone, Silica, Alumina, Gypsum
+Produces CO2 through oxidation of Limestone
+Gypsum provides additional calcium
+
+Input Parameters:
+  Mixing Temperature
+  Minerals Content
+  CementParticleSize
+
+Properties 
+  Controlled:
+    Alkali Content
+    Fineness
+    Chemical Composition
+  Influenced:
+    Deterioration
+
+
+Mixing
+  Fiber inclusion: clustering, dispersion
+  Temperature Workbility, Flowability
+  Mixing Time 
+  Mixing Sequence (dispersion of components)
+  HYdration Heat Curve
+    Dormancy (mixing, transport, and placing)
+    Initial Set
+    Hydration Acceleration
+    Strength Stress Development
+    Hydration deceleration
+Transport
+  Additives: polymers that neutralize charge on cement particles that prevent setting and hydration reaction
+    Retardants
+    Super-plasticizer (flowability, homogenenaity)
+Placing
+  Pumping (needs super-plasticizers)
+  Casting
+  Compaction (vibration)
+  Surface treatment
+Curing
+  prevent moisture loss
+  heat management
+Asphalt Concrete
+  mixing plan is the same
+  binder is viscoelastic material (petrolium extract)'''.
+
+:PolymerProcessing  a owl:Class; rdfs:subClassOf sio:Method;
+rdfs:comment '''Extrusion
+Solid polymer -> heated barrel with screw (shears material, forces extrusion) (need to balance temperature and shear rate along the barrel)-> pressure flow 
+    Blown film manufacture - pressure of air determines 
+Injection Molding
+  Starts with extruder, force polymer into mold
+  Parameters: temperature of the mold, pressure of the runner (channels to fill the mold)
+  Results: residual stress, incomplete filling, crystal size
+Properties:
+Viscosity (function of temperature and strain rate (shear rate))
+Morphology development (semicrystalline, amorphous)
+Linear or crosslinked final polymer
+
+RotationalMolding 
+beads are melted and stick to inside surface of mold (trash cans, etc)
+
+BlowMolding
+Extruder, compressed air, mold around the cylinder
+
+Thermoforming
+  VaccumForming
+    StraightVaccumForming
+    DrapeVacuumForming
+
+Parameters:
+:Temperature
+:ShearRate
+:ShearStress
+:Pressure
+:TotalEnergyInput
+:CoolingRate
+:PartShape (non-uniform residual stresses)
+:DrawRatio (how much strain occurs after solification)'''.
+
+
+:MicroelectronicsProcessing a owl:Class; rdfs:subClassOf sio:Method;
+rdfs:comment '''
+:SiliconMicroelectronicsProcessing
+
+UltraPureSemiconductors
+ControlledElectricallyActiveImpurities (dopants)
+MetalConnectors
+
+MOSFET
+ElectronMobility
+Silicon:
+  Relatively Poor Electron Mobility
+  Relatively Good Thermal Conductivity
+  Relatively Good Mechanical Strength
+  Forms Excellent Insulating Barrier on Oxidation: Si02
+Start with Silicon Wafer
+  BulkCrystalGrowth creating SI Crystal Ingot
+EpitaxialGrowth
+  Varies the composition or doping across the whole wafer
+  ChemicalVaporDeposition
+    Important to get temperature and pressure exactly right
+Lithography/Patterning
+  Glass mask using UV 
+Etching
+  Wet Etching (high selectivity, isotropic)
+  Dry Etching (Plasma Etching)
+  Etches through Epitaxial Growth and substrate
+Doping
+  IonImplantation
+  RedristributionOfIons
+Metal and Insulator Deposition (interconnect, isolation)
+  MultipleLayers of lines to connect and isolate
+  Insulators needed a higher DielectricConstant, moved to Hafnium Oxide
+Packaging'''.
+
+:CompositeProcessing  a owl:Class; rdfs:subClassOf sio:Method;
+rdfs:comment ''':PolymerMatrixComposite
+Reinforcement
+  Glass
+  Carbon/Graphite
+  Kevlar
+  etc.
+  Chopped
+  Woven
+  Mat (randomly oriented fibers)
+  Continuous
+Resins
+  Thermosets (no remelt)
+  Thermoplastics (remelt)
+OpenMolding subClassOf CompositeProcessing
+  HandLayup & ManualConsolidation
+  SprayUp & ManualConsolidation (weaker)
+  FilamentWinding (pressure vessels) wrapped under high tension
+Curing (Thermoset)
+  OvenCuring
+  OpenAirCuring
+CNCTrimming
+  Router
+  AbrasiveWaterJet
+HandTrimming
+
+Input Controls:
+  FiberType
+  Diameter
+  Length
+  Sizing (coating)
+  Resin Type
+    Rheology
+  MoldTemperature
+  DegreeOfConsolidation
+  CuringTemperature
+    Profile
+    Uniformity
+  Humidity
+Manufacturing Issues:
+  CycleType (minimize)
+  Cost (minimize)
+  Yield (max)
+
+Properties (engineered)
+  Geometry
+  Dimensionality
+  Tolerances
+  Thickness
+  Stiffness
+  Strength
+  Weight
+  Stiffness/Weight
+  Strength/Weight
+  FiberVolumeFraction
+  VoidVolumeFraction
+  Aesthetics
+
+ClosedMolding
+  VacuumBagMolding
+  CompressionMolding/Consolidation pressure
+   Includes Pre-impregnated (prepreg) fiber that includes epoxy in it already
+  VacuumInfusionProcessing (with dry fiber preform and liquid resin)
+  ResinTransferMolding (with dry fiber preform and liquid resin)
+  Autoclaving
+    Pressure across entire material with heat
+  OvenCuring
+Input Controls:
+  FiberType
+  Diameter
+  Length
+  Sizing (coating)
+  Resin Type
+    Rheology
+  MoldTemperature
+  DegreeOfConsolidation
+    ConsilidationPressure
+    ConsolidationUniformity
+  CuringTemperature
+    Profile
+    Uniformity
+  Humidity
+Manufacturing Issues:
+  CycleType (minimize)
+  Cost (minimize)
+  Yield (max)
+
+Properties (engineered)
+  Geometry
+  Dimensionality
+  Tolerances
+  Thickness
+  Stiffness
+  Strength
+  Weight
+  Stiffness/Weight
+  Strength/Weight
+  FiberVolumeFraction
+  VoidVolumeFraction
+  Aesthetics
+
+Joining
+  ScarfJoints
+  Large Bonding Surface
+
+:Asphalt rdfs:subClassOf :Thermoplastic'''.
+
+:AdditiveManufacturing  a owl:Class; rdfs:subClassOf sio:Method.
+
+:MetalAdditiveManufacturing  a owl:Class; rdfs:subClassOf sio:Method;
+rdfs:comment '''The process of joining materials to make objects from three dimensional model data, usually layer upon layer, as opposed to subtractive''';
+sio:hasPart :CreateCADGeometry, :ConvertToSTLFile, :SliceSTLFileIntoLayers, :BuildModelLayerByLayer, :PostProcessing.
+
+:BuildModelLayerByLayer a owl:Class;
+  sio:hasPart :MaterialDelivery, :EnergyDelivery.
+
+:MaterialDelivery a owl:Class.
+  :PowderBedDelivery a owl:Class; rdfs:subClasOf :MaterialDelivery.
+  :LiquidPolymerBath a owl:Class; rdfs:subClasOf :MaterialDelivery.
+
+:EnergyDelivery a owl:Class.
+  :Laser a owl:Class; rdfs:subClasOf :EnergyDelivery.
+  :ElectronBeam a owl:Class; rdfs:subClasOf :EnergyDelivery.
+  :Heat a owl:Class; rdfs:subClasOf :EnergyDelivery.
+  :UVLightCuring a owl:Class; rdfs:subClasOf :EnergyDelivery.
+
+:PolymerAdditiveManufacturing a owl:Class; rdfs:subClasOf :AdditiveManufacturing.
+:MetalAdditiveManufacturing a owl:Class; rdfs:subClasOf :AdditiveManufacturing.
+  :SelectiveLaserSintering a owl:Class; rdfs:subClasOf :MetalAdditiveManufacturing;
+    sio:hasPart :MaterialDeposition, :Sintering.
+    :SelectiveLaserMelting a owl:Class; rdfs:subClasOf :SelectiveLaserSintering.
+    :EBeam a owl:Class; rdfs:subClasOf :SelectiveLaserSintering.
+
+:LENS rdfs:label 'Laser Engineered Net Shaping'; a owl:Class; rdfs:subClasOf :MetalAdditiveManufacturing.
+
+:HotIsostaticPressing rdfs:subClassOf :PostProcessing; rdfs:comment "minimizes the defects (pore sizes) in the final part".
+:AnnealingCycle rdfs:comment "affects residual stress"; rdfs:subClassOf :PostProcessing.
+
+:ElectrochemicalProcessing rdfs:subClassOf sio:Method; 
+rdfs:comment '''
+:AnodicReaction 'metal going into solution'
+:CathodicReaction 'metal coming out of solution'
+:Electrodeposition
+  Plating to electronic structures
+  microstructural control
+:ElectrolessDeposition
+  Non-metallic substartes
+:ElectroMachining
+  Mirror-like finishes with great precision
+:Electrowinning "Dissolve the ores into solution, plate the metals out of solution"
+  Refining of ores
+  Metal Purification
+  Set electric potential precisely and only one metal will plate out.
+  Issues:
+    Waste displosal
+    Cathode stripping of metal
+    Toxic chemicals, especially in eletrorefining
+
+Energy Technologies:
+ Solar Energy Conservation
+  Plating of photovoltaics
+  Ge nanowires
+ Batteries (Li)
+  Issues:
+    Capacitance fade
+    heat generation
+    waste disposal
+Nuclear Waste Disposal:
+  Pyro-electrochemistry
+  Reduce radioactive oxides
+  Issues:
+    Efficiency
+    Seondary Waste Disposal
+    Plant Scale-up
+Microelectronic Interconnects:
+  Damascene structures (pattern layered into something else)
+  Chemical Mechanical Planarization/Polishing
+    Combination of Chemical and mechanical removal of metal and/or metal oxides.
+SlurryChemicals
+  Concentration
+  Isoelectric Point
+  Suspension
+Abrasives
+  size
+  Type
+  Ph
+
+Process Variables
+  Slurry Slow rate
+  temp
+  pressure
+  velocity
+  frictional force 
+  pattern geometry
+  pad characteristics
+  wafer characteristics'''.
+
