@@ -17,11 +17,6 @@
 <file:///Users/jimmccusker/src/nanomine-ontology/nan> a owl:Class ;
     rdfs:label "nan" .
 
-<file:///Users/jimmccusker/src/nanomine-ontology/nanomineAC_DielectricConstant> a owl:Class ;
-    rdfs:label "AC Dielectric Constant" ;
-    nanomine:hasSelector "//AC_Dielectric_Constant" ;
-    rdfs:subClassOf nanomine:ElectricalProperty .
-
 :ns a owl:Ontology ;
     rdfs:label "Nanomaterials Ontology" ;
     dcterms:creator <https://tw.rpi.edu/instances/Deborah_L_McGuinness>,
@@ -31,6 +26,11 @@
     owl:imports bibo:,
         <http://semanticscience.org/ontology/sio-subset-labels.owl>,
         <http://www.nanopub.org/nschema#> .
+
+nanomine:AC_DielectricConstant a owl:Class ;
+    rdfs:label "AC Dielectric Constant" ;
+    nanomine:hasSelector "//AC_Dielectric_Constant" ;
+    rdfs:subClassOf nanomine:ElectricalProperty .
 
 nanomine:AC_DielectricDispersion a owl:Class ;
     rdfs:label "AC Dielectric Dispersion" ;

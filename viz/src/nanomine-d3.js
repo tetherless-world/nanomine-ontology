@@ -12,8 +12,8 @@ String.prototype.unCamelCase = function(){
 
 var nanomineD3 = angular.module('adf.widget.nanomine-d3', ['adf.provider', 'nvd3']);
 
-//nanomineD3.value('nanomineEndpoint', "http://nanomine.northwestern.edu:8001/blazegraph/sparql");
-nanomineD3.value('nanomineEndpoint', "http://localhost:9999/blazegraph/sparql");
+nanomineD3.value('nanomineEndpoint', "http://nanomine.northwestern.edu:8001/blazegraph/sparql");
+//nanomineD3.value('nanomineEndpoint', "http://localhost:9999/blazegraph/sparql");
 
 function appendTransform(defaults, transform) {
 
@@ -142,8 +142,8 @@ nanomineD3.controller('nanomineD3EditController', [
 
 nanomineD3.factory('conf', function() {
     var config = {
-//        endpoint : "http://nanomine.northwestern.edu:8001/blazegraph/sparql"
-        endpoint : "http://localhost:9999/blazegraph/sparql"
+        endpoint : "http://nanomine.northwestern.edu:8001/blazegraph/sparql"
+//        endpoint : "http://localhost:9999/blazegraph/sparql"
     };
     return config;
 })
@@ -353,7 +353,8 @@ select distinct ?type (count(?c) as ?count) (sample(?label) as ?label) ?material
   } union {\n\
     ?p a nanomine:PolymerNanocomposite.\n\
     BIND(nanomine:PolymerNanocomposite as ?materialType)\n\
-  }  ?p sio:hasAttribute ?attr.\n\
+  }\n\
+  ?p sio:hasAttribute ?attr.\n\
   ?attr a ?type.\n\
   ?attr sio:hasValue ?value.\n\
   optional { ?attr sio:hasUnit ?unit. ?unit rdfs:label ?unitLabel}\n\

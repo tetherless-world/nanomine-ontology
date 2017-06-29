@@ -59,14 +59,14 @@ def download_xml():
             id = doc[u'_id']
 
             # save json 
-            with open('./json_api/json-'+str(title)+'-'+str(schema)+'-'+str(id)+'.json', 'w+') as outfile:
+            with open('./json_api/json-'+str(title)+'.json', 'w+') as outfile:
                 json.dump(doc['content'], outfile)
 
             # convert to xml 
             data_xml = dicttoxml.dicttoxml(doc['content']['PolymerNanocomposite'], custom_root='PolymerNanocomposite',attr_type=False)
 
             # save 
-            xml_path = XML_DIR+str(title)+'-'+str(schema)+'-'+str(id)+'.xml'
+            xml_path = XML_DIR+str(title)+'.xml'
             with codecs.open(xml_path, 'w', "utf-8") as _f:
                 _f.write("%s\n" % (parseString(data_xml).toprettyxml())[23:])
 
