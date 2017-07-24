@@ -539,6 +539,10 @@ nanomine:Manufacturer a owl:Class ;
     skos:definition "An organization that enages in the value added production of merchandise for use or sale using labour and machines, tools, chemical and biological processing, or formulation." ;
     prov:wasQuotedFrom "https://en.wikipedia.org/wiki/Manufacturing" .
 
+nanomine:MassFraction a owl:Class ;
+    rdfs:label "Mass Fraction" ;
+    rdfs:subClassOf sio:Concentration .
+
 nanomine:Matrix a owl:Class ;
     rdfs:label "Matrix" ;
     rdfs:subClassOf sio:Role .
@@ -894,6 +898,11 @@ nanomine:VolumeExpansionCoefficient a owl:Class ;
             owl:onProperty sio:hasUnit ],
         nanomine:VolumetricProperty ;
     skos:definition "volumetric coefficient of thermal expansion" .
+
+nanomine:VolumeFraction a owl:Class ;
+    rdfs:label "Volume Fraction" ;
+    rdfs:subClassOf sio:Concentration ;
+    skos:definition "The volume of a constituent divided by the volume of all constituents of the mixture prior to mixing." .
 
 nanomine:VolumeResistivity a owl:Class ;
     rdfs:label "Volume Resistivity" ;

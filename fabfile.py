@@ -66,7 +66,7 @@ def download_xml():
             data_xml = dicttoxml.dicttoxml(doc['content']['PolymerNanocomposite'], custom_root='PolymerNanocomposite',attr_type=False)
 
             # save 
-            xml_path = XML_DIR+str(title)+'.xml'
+            xml_path = XML_DIR+str(title)
             with codecs.open(xml_path, 'w', "utf-8") as _f:
                 _f.write("%s\n" % (parseString(data_xml).toprettyxml())[23:])
 
@@ -81,23 +81,26 @@ def convert_xml(debug=None):
     else:
         files = os.listdir(XML_DIR)[:PROCESS_FILE_COUNT]
     for filename in files:
-        print 'Processing', filename
-        local_setl_graph = Graph()
-        local_setl_graph += setl_graph
-        input_file_resource = local_setl_graph.resource(URIRef('http://nanomine.tw.rpi.edu/setl/xml/nanomine_xml'))
-        input_file_resource.value(prov.wasGeneratedBy).set(prov.used, URIRef('file://'+XML_DIR+filename))
+        try:
+            print 'Processing', filename
+            local_setl_graph = Graph()
+            local_setl_graph += setl_graph
+            input_file_resource = local_setl_graph.resource(URIRef('http://nanomine.tw.rpi.edu/setl/xml/nanomine_xml'))
+            input_file_resource.value(prov.wasGeneratedBy).set(prov.used, URIRef('file://'+XML_DIR+filename))
 
-        output_file_resource = local_setl_graph.resource(URIRef(OUTPUT_DIR+filename.replace('.xml','.trig')))
-        output_file_resource.set(prov.used, URIRef('file://'+OUTPUT_DIR+filename))
-        output_file_resource.set(dc['format'], Literal('trig'))
-        output_file_resource.set(RDF.type,pv.File)
-        generated_by = local_setl_graph.resource(BNode())
-        output_file_resource.set(prov.wasGeneratedBy, generated_by)
-        generated_by.set(RDF.type, setl.Load)
-        generated_by.set(prov.used, URIRef('http://nanomine.tw.rpi.edu/setl/xml/nanopubs'))
-
-        resources = setlr._setl(local_setl_graph)
-        for identifier, graph in resources.items():
-            if hasattr(graph, 'close'):
-                print "Closing",identifier
-                graph.close()
+            output_file_resource = local_setl_graph.resource(URIRef(OUTPUT_DIR+filename.replace('.xml','.trig')))
+            output_file_resource.set(prov.used, URIRef('file://'+OUTPUT_DIR+filename))
+            output_file_resource.set(dc['format'], Literal('trig'))
+            output_file_resource.set(RDF.type,pv.File)
+            generated_by = local_setl_graph.resource(BNode())
+            output_file_resource.set(prov.wasGeneratedBy, generated_by)
+            generated_by.set(RDF.type, setl.Load)
+            generated_by.set(prov.used, URIRef('http://nanomine.tw.rpi.edu/setl/xml/nanopubs'))
+    
+            resources = setlr._setl(local_setl_graph)
+            for identifier, graph in resources.items():
+                if hasattr(graph, 'close'):
+                    print "Closing",identifier
+                    graph.close()
+        except Exception as e:
+            print e
