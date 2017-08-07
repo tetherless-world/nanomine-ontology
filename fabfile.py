@@ -4,6 +4,7 @@ from fabric.utils import abort
 import requests
 import rdflib
 from rdflib.plugins.stores.sparqlstore import SPARQLUpdateStore
+from rdflib.plugins.stores.sparqlstore import SPARQLUpdateStore, _node_to_sparql, SPARQL_NS, _node_from_result
 import getpass
 import urllib2
 import os.path
@@ -11,6 +12,26 @@ import os
 import setlr
 from os import listdir
 from rdflib import *
+
+def node_to_sparql(node):
+    if isinstance(node, BNode):
+        return '<bnode:b%s>' % node
+    return _node_to_sparql(node)
+
+def node_from_result(node):
+    if node.tag == '{%s}uri' % SPARQL_NS and node.text.startswith("bnode:"):
+        return BNode(node.text.replace("bnode:",""))
+    else:
+        return _node_from_result(node)
+    
+def endpoint(endpoint):
+    defaultgraph = None
+    store = SPARQLUpdateStore(queryEndpoint=endpoint,
+                              update_endpoint=endpoint,
+                              node_to_sparql=node_to_sparql,
+                              node_from_result=node_from_result)
+    graph = ConjunctiveGraph(store,defaultgraph)
+    return graph
 
 XML_DIR='xml/'
 OUTPUT_DIR='nanopublications/'
@@ -104,3 +125,18 @@ def convert_xml(debug=None):
                     graph.close()
         except Exception as e:
             print e
+
+def upload_nanopubs():
+    db = endpoint('http://nanomine.northwestern.edu:8001/blazegraph/sparql')
+    files = os.listdir(OUTPUT_DIR)[:PROCESS_FILE_COUNT]
+    prefix = Namespace("http://nanomine.tw.rpi.edu/entry/")
+    for filename in files:
+        print "Loading", filename
+        identifier = filename.replace(".trig","").replace(" ",'')
+        for context in [prefix[identifier],
+                        prefix[identifier+"_assertion"],
+                        prefix[identifier+"_provenance"],
+                        prefix[identifier+"_pubinfo"]]:
+            db.remove((None,None,None,context))
+        db.parse(open(OUTPUT_DIR+filename), format="trig")
+    print "Done."

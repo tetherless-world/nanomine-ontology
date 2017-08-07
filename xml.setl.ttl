@@ -57,13 +57,14 @@
   "location" :    "http://nanomine.tw.rpi.edu/location/",
   "lang" :    "http://nanomine.tw.rpi.edu/language/",
   "void" :    "http://rdfs.org/ns/void#",
-  "dcat" : "http://www.w3.org/ns/dcat#"
+  "dcat" : "http://www.w3.org/ns/dcat#",
+  "xsd" : "http://www.w3.org/2001/XMLSchema#"
 }''';
     prov:value """[{
     "@for": "id in row.findall('ID')",
     "@do": {
       "@if" : "id.text is not None",
-      "@id": "entry:{{slugify(id.text)}}",
+      "@id": "entry:{{id.text}}",
       "@graph": [
         {
           "@id": "entry:{{id.text}}",
@@ -117,24 +118,21 @@
                       "sio:hasAttribute" : [
                         {
                           "@for" : ["fraction in [ x for x in [",
-                                    "row.find('MATERIALS/Filler/FillerComposition/mass'),",
-                                    "row.find('MATERIALS/Filler/FillerComposition/volume'),",
-                                    "particle.find('FillerComposition/mass'),",
-                                    "particle.find('FillerComposition/volume'),",
-                                    "] if x is not None]"
+                                    "particle.find('FillerComponentComposition/*'),",
+                                    "row.find('MATERIALS/Filler/FillerComposition/*'),",
+                                    "] if x is not None][:1]"
                                    ],
                           "@do" : {
                               "@id" : "sample:{{slugify(id.text)}}_filler_{{fc}}_{{fraction.tag}}_fraction",
-                              "rdfs:label" : "{{fraction.text}}",
                               "sio:hasValue" : [
                                   {
-                                      "@if" : "'%' in fraction.text",
-                                      "@value" : "{{float(fraction.text.replace('%',''))/100}}",
+                                      "@if" : "'%' not in fraction.text",
+                                      "@value" : "{{fraction.text.split(' ')[0]}}",
                                       "@type": "xsd:decimal"
                                   },
                                   {
-                                      "@if" : "'%' not in fraction.text",
-                                      "@value" : "{% set v = float(fraction.text) %}{% if v > 1 %}{{ v/100 }}{% else %}{{v}}{% endif %}",
+                                      "@if" : "'%' in fraction.text",
+                                      "@value" : "{{float(fraction.text.replace('%','').split(' ')[0])/100.0}}",
                                       "@type": "xsd:decimal"
                                   }
                               ],

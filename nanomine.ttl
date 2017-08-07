@@ -701,6 +701,11 @@ nanomine:Spectroscopy a owl:Class ;
     rdfs:subClassOf sio:Quantity ;
     skos:definition "The chemical composition ,composition variation ,crystal structure & photo-electric properties of the materials." .
 
+nanomine:Strain a owl:Class ;
+    rdfs:label "Strain" ;
+    rdfs:subClassOf nanomine:MechanicalProperty ;
+    skos:definition "Engineering strain is defined as the amount of deformation in the direction of the applied force divided by the initial length of the material." .
+
 nanomine:StrainRate a owl:Class ;
     rdfs:label "Strain Rate" ;
     nanomine:hasSelector "//StrainRate" ;
@@ -709,6 +714,11 @@ nanomine:StrainRate a owl:Class ;
             owl:onProperty sio:hasUnit ],
         nanomine:Condition ;
     skos:definition "Rate of strain change" .
+
+nanomine:Stress a owl:Class ;
+    rdfs:label "Stress" ;
+    rdfs:subClassOf nanomine:MechanicalProperty ;
+    skos:definition "When a material is loaded with a force, it produces a stress, which then causes a material to deform. " .
 
 nanomine:SurfaceResistivity a owl:Class ;
     rdfs:label "Surface Resistivity" ;
@@ -930,6 +940,11 @@ nanomine:XRayDiffractionAndScattering a owl:Class ;
     rdfs:subClassOf sio:Measuring ;
     skos:definition "Non-destructive X-ray measurement for crystal structure, chemical composition, and physical properties" .
 
+sio:AspectRatio a owl:Class ;
+    rdfs:label "Aspect Ratio" ;
+    rdfs:subClassOf sio:Ratio ;
+    skos:definition "The aspect ratio of a geometric shape is the ratio of its sizes in different dimensions." .
+
 sio:Density a owl:Class ;
     rdfs:label "Density" .
 
@@ -1086,14 +1101,14 @@ nanomine:ViscoelasticProperty a owl:Class ;
 <http://nanomine.tw.rpi.edu/ns/unit/k> a sio:UnitOfMeasurement ;
     rdfs:label "K" .
 
-nanomine:MechanicalProperty a owl:Class ;
-    rdfs:label "Mechanical Property" ;
-    rdfs:subClassOf sio:Quantity .
-
 nanomine:TensileCreep a owl:Class ;
     rdfs:label "Tensile Creep" ;
     rdfs:subClassOf nanomine:Creep ;
     skos:definition "creep during tensile test" .
+
+nanomine:MechanicalProperty a owl:Class ;
+    rdfs:label "Mechanical Property" ;
+    rdfs:subClassOf sio:Quantity .
 
 nanomine:VolumetricProperty a owl:Class ;
     rdfs:label "Volumetric Property" ;
