@@ -1,0 +1,199 @@
+@prefix rdf:           <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:          <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:           <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:           <http://www.w3.org/2002/07/owl#> .
+@prefix skos:          <http://www.w3.org/2004/02/skos/core#> .
+@prefix prov:          <http://www.w3.org/ns/prov#> .
+@prefix sio:           <http://semanticscience.org/resource/> .
+@prefix dcat:          <http://www.w3.org/ns/dcat#> .
+@prefix dcterms:       <http://purl.org/dc/terms/> .
+@prefix void:          <http://rdfs.org/ns/void#> .
+@prefix foaf:          <http://xmlns.com/foaf/0.1/> .
+@prefix ov:            <http://open.vocab.org/terms/> .
+@prefix setl:          <http://purl.org/twc/vocab/setl/> .
+@prefix csvw:          <http://www.w3.org/ns/csvw#> .
+@prefix pv:            <http://purl.org/net/provenance/ns#>.
+
+@prefix :              <http://nanomine.tw.rpi.edu/setl/json/> .
+
+@prefix nanopub: <http://www.nanopub.org/nschema#> .
+
+:nanomine_json a setl:JSON;
+  prov:wasGeneratedBy [
+    a setl:Extract;
+    prov:used <nanomine.json>;
+  ].
+
+:nanopubs a void:Dataset, dcat:Dataset;
+  prov:wasGeneratedBy [
+    a setl:Transform, setl:JSLDT;
+    prov:used :nanomine_json;
+    setl:hasContext '''{
+  "@vocab" :  "http://hadatac.org/ont/chear#",
+  "dataset" : "https://hbgd.tw.rpi.edu/dataset/",
+  "sio" :     "http://semanticscience.org/resource/",
+  "chear" :   "http://hadatac.org/ont/chear#",
+  "skos" :    "http://www.w3.org/2004/02/skos/core#",
+  "dcterms" :    "http://purl.org/dc/terms/",
+  "prov" :    "http://www.w3.org/ns/prov#",
+  "rdfs" :    "http://www.w3.org/2000/01/rdf-schema#",
+  "doi" :    "http://dx.doi.org/",
+  "nanomine" :    "http://nanomine.tw.rpi.edu/ns/",
+  "author" :    "http://nanomine.tw.rpi.edu/author/",
+  "publication" :    "http://nanomine.tw.rpi.edu/publication/",
+  "bibo" : "http://purl.org/ontology/bibo/",
+  "foaf" : "http://xmlns.com/foaf/0.1/",
+  "nanopub" :    "http://www.nanopub.org/nschema#",
+  "entry" :    "http://nanomine.tw.rpi.edu/entry/",
+  "location" :    "http://nanomine.tw.rpi.edu/location/",
+  "lang" :    "http://nanomine.tw.rpi.edu/language/",
+  "void" :    "http://rdfs.org/ns/void#",
+  "dcat" : "http://www.w3.org/ns/dcat#"
+}''';
+    prov:value '''[{
+    "@for": "dataset in row",
+    "@do": {
+      "@if" : "dataset['content']['PolymerNanocomposite']['ID'] is not None",
+      "@id": "entry:{{slugify(dataset['content']['PolymerNanocomposite']['ID']|string)}}",
+      "@graph": [
+        {
+          "@id": "entry:{{slugify(dataset['content']['PolymerNanocomposite']['ID']|string)}}",
+          "@type" : "nanopub:Nanopublication",
+          "nanopub:hasAssertion" : {
+            "@id": "entry:{{slugify(dataset['content']['PolymerNanocomposite']['ID']|string)}}_assertion",
+            "@type": "nanopub:Assertion",
+            "@graph" : [
+            ]
+          },
+          "nanopub:hasProvenance" : {
+            "@id": "entry:{{slugify(dataset['content']['PolymerNanocomposite']['ID']|string)}}_provenance",
+            "@type": "nanopub:Provenance",
+            "@graph" : [
+            ]
+          },
+          "nanopub:hasPublicationInfo" : {
+            "@id": "entry:{{slugify(dataset['content']['PolymerNanocomposite']['ID']|string)}}_pubinfo",
+            "@type": "nanopub:PublicationInfo",
+            "@graph" : [
+              {
+                "@id" : "entry:{{slugify(dataset['content']['PolymerNanocomposite']['ID']|string)}}_assertion",
+                "prov:generatedAtTime" : [
+                  {
+                    "@if" : "dataset['content']['PolymerNanocomposite']['DATA_SOURCE']['Citation']['CommonFields']['DateOfCitation']",
+                    "@type" : "xsd:date",
+                    "@value" : "{{dataset['content']['PolymerNanocomposite']['DATA_SOURCE']['Citation']['CommonFields']['DateOfCitation']}}"
+                  }
+                ],
+                "prov:wasQuotedFrom" : [
+                  {
+                    "@if" : "dataset['content']['PolymerNanocomposite']['DATA_SOURCE']['Citation']['CommonFields']['DOI']",
+                    "@for" : "citation in [dataset['content']['PolymerNanocomposite']['DATA_SOURCE']['Citation']]",
+                      "@do": {
+                        "@id" :  "doi:{{citation['CommonFields']['DOI']}}",
+                        "@type" : [
+                        "dcterms:BibliographicResource",
+                        { "@id" : "{{ {'research article':'nanomine:ResearchArticle','conference proceeding':'nanomine:ProceedingsArticle','communication':'nanomine:Communication','review':'nanomine:ReviewArticle','letter':'bibo:Letter','technical comment':'nanomine:TechnicalComment'}[citation['CommonFields']['CitationType']] }}"}
+                      ],
+                      "dcterms:title" : "{{citation['CommonFields']['Title']}}",
+                      "rdfs:seeAlso" : {
+                        "@if" : "citation['CommonFields']['URL']",
+                        "@id" : "{{citation['CommonFields']['URL']}}"
+                      },
+                      "dcterms:created" : {
+                        "@value" : "{{citation['CommonFields']['PublicationYear']|int}}",
+                        "@type" : "xsd:integer"
+                      },
+                      "bibo:volume" : {
+                        "@if" : "citation['CommonFields']['Volume']",
+                        "@value" : "{{citation['CommonFields']['Volume']|int}}",
+                        "@type" : "xsd:integer"
+                      },
+                      "dcterms:language" : {
+                        "@if" : "citation['CommonFields']['Language']",
+                        "@id" : "lang:{{slugify(citation['CommonFields']['Language'])}}",
+                        "@type" : "dcterms:LinguisticSystem",
+                        "rdfs:label" : "{{citation['CommonFields']['Language']}}"
+                      },
+                      "bibo:volume" : {
+                        "@if" : "citation['CommonFields']['Volume']",
+                        "@value" : "{{citation['CommonFields']['Volume']|int}}",
+                        "@type" : "xsd:integer"
+                      },
+                      "dcterms:creator" : [
+                        {
+                          "@if" : "isinstance(citation['CommonFields']['Author'], list)",
+                          "@for" : "author in citation['CommonFields']['Author']",
+                          "@do" : 
+                            {
+                              "@id" : "author:{{slugify(author)}}",
+                              "@type" : "prov:Agent",
+                              "foaf:name" : "{{author}}"
+                            }
+                        },
+                        {
+                          "@if" : "not isinstance(citation['CommonFields']['Author'], list)",
+                          "@id" : "author:{{slugify(citation['CommonFields']['Author'])}}",
+                          "@type" : "prov:Agent",
+                          "foaf:name" : "{{citation['CommonFields']['Author']}}"
+                        }
+                      ],
+                      "dcterms:isPartOf" : {
+                        "@id" : "publication:{{slugify(citation['CommonFields']['Publication'])}}",
+                        "dcterms:title" : "{{citation['CommonFields']['Publication']}}",
+                        "dcterms:publisher" : {
+                          "@if" : "citation['CommonFields']['Publisher']",
+                          "@id" : "publisher:{{slugify(citation['CommonFields']['Publisher'])}}",
+                          "rdfs:label" : "{{citation['CommonFields']['Publisher']}}",
+                          "prov:atLocation" : {
+                            "@if" : "citation['CommonFields']['Location']",
+                            "@type" : "dcterms:Location",
+                            "@id" : "location:{{slugify(citation['CommonFields']['Location'])}}",
+                            "rdfs:label" : "{{citation['CommonFields']['Location']}}"
+                          }
+                        }
+                      },
+                      "dcat:keyword" : [
+                        {
+                          "@if" : "';' in citation['CommonFields']['Keyword']",
+                          "@for" : "keyword in re.split('\\\\s*[;]\\\\s*', citation['CommonFields']['Keyword'])",
+                          "@do" : "{{keyword.strip().title()}}"
+                        },
+                        {
+                          "@if" : "';' not in citation['CommonFields']['Keyword'] and not isinstance(citation['CommonFields']['Keyword'], list)",
+                              "@value" : "{{citation['CommonFields']['Keyword'].strip().title()}}"
+                        },
+                        {
+                          "@if" : "isinstance(citation['CommonFields']['Keyword'], list)",
+                          "@for" : "keyword in citation['CommonFields']['Keyword']",
+                          "@do" : [
+                            {
+                              "@if" : "';' in keyword",
+                              "@for" : "k in re.split('\\\\s*[;]\\\\s*', keyword)",
+                              "@do" : "{{k.strip().title()}}"
+                            },
+                            {
+                              "@if" : "';' not in keyword",
+                              "@value" : "{{keyword.strip().title()}}"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+]'''
+  ].
+
+<nanomine_nanopubs.trig> a pv:File;
+    dcterms:format "application/trig";
+    prov:wasGeneratedBy [
+      a setl:Load;
+      prov:used :nanopubs ;
+    ].
