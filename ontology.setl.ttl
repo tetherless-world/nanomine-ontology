@@ -55,8 +55,12 @@
   ].
 
 
+:ontology a setl:SemanticETLScript;
+  rdfs:label "Nanomine Ontology SETL Script".
+
+
 <http://nanomine.tw.rpi.edu/ns> a void:Dataset;
-  prov:wasGeneratedBy [
+  prov:wasGeneratedBy :ontology, [
     a setl:Transform, setl:JSLDT;
     prov:used :imports_table;
     setl:hasContext '''{
