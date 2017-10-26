@@ -15,12 +15,12 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 :ns {
-    <file:///Users/jimmccusker/src/nanomine-ontology/nan> a owl:Class ;
+    <file:///apps/satoru/nan> a owl:Class ;
         rdfs:label "nan" .
 
     :ns a owl:Ontology ;
         rdfs:label "Nanomaterials Ontology" ;
-        dcterms:creator <https://tw.rpi.edu/instances/Deborah_L_McGuinness>,
+        dc:creator <https://tw.rpi.edu/instances/Deborah_L_McGuinness>,
             <https://tw.rpi.edu/instances/JamesMcCusker>,
             <https://tw.rpi.edu/instances/VipulaRawte> ;
         rdfs:comment "A nanomaterials ontology to support data publication using Nanomine." ;

@@ -48,7 +48,7 @@ def result(s, *args, **kwargs):
     return ET.fromstring(s, *args, **kwargs)
 '''.
 
-:nanopubs a void:Dataset, dcat:Dataset;
+:nanopubs a void:Dataset, dcat:Dataset, setl:Persisted;
   prov:wasGeneratedBy :xml_import, [
     a setl:Transform, setl:JSLDT;
     prov:used :nanomine_json;
@@ -551,9 +551,9 @@ def result(s, *args, **kwargs):
 }]"""
   ].
 
-<nanopublications.trig> a pv:File;
-    dcterms:format "application/trig";
-    prov:wasGeneratedBy [
-      a setl:Load;
-      prov:used :nanopubs ;
-    ].
+#<nanopublications.trig> a pv:File;
+#    dcterms:format "application/trig";
+#    prov:wasGeneratedBy [
+#      a setl:Load;
+#      prov:used :nanopubs ;
+#    ].
