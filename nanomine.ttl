@@ -571,7 +571,6 @@ nanomine:NucleationParameterOfAvramiEquation a owl:Class ;
 nanomine:Particle a owl:Class ;
     rdfs:label "Particle" ;
     rdfs:subClassOf nanomine:Nanomaterial ;
-    skos:altLabel "Filler" ;
     skos:definition "particles between 1 and 100 nanometers in size. In nanotechnology, a particle is defined as a small object that behaves as a whole unit with respect to its transport and properties." ;
     prov:wasQuotedFrom "https://en.wikipedia.org/wiki/Nanoparticle" .
 

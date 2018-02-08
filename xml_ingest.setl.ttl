@@ -26,10 +26,17 @@
     prov:used <https://docs.google.com/spreadsheets/d/1hDqbUzgJ2menVFhkjAvZs5uWgVoO-lxi7nxOh6W2QiA/export?exportFormat=csv&gid=1806836834>;
   ].
 
+:characterization_methods_table a csvw:Table, setl:Table;
+  prov:wasGeneratedBy [
+    a setl:Extract;
+    prov:used <https://docs.google.com/spreadsheets/d/1hDqbUzgJ2menVFhkjAvZs5uWgVoO-lxi7nxOh6W2QiA/export?exportFormat=csv&gid=798992913>;
+  ].
+
 :nanomine_json a setl:JSON;
   api_vocab:selector "item";
   prov:wasGeneratedBy [
      a setl:Extract;
+#     prov:used <http://129.105.90.149:8000/rest/explore/select?title=L206_S22_Cho_2005.xml&dataformat=xml>
      prov:used <http://129.105.90.149:8000/rest/explore/select/all?dataformat=xml>;
   ].
 
@@ -54,6 +61,7 @@ def result(s, *args, **kwargs):
     prov:used :nanomine_json;
     prov:qualifiedUsage [ a prov:Usage; prov:entity :parse_xml; prov:hadRole [ dcterms:identifier "parse_xml"]];
     prov:qualifiedUsage [ a prov:Usage; prov:entity :property_classes_table; prov:hadRole [ dcterms:identifier "properties"]];
+    prov:qualifiedUsage [ a prov:Usage; prov:entity :characterization_methods_table; prov:hadRole [ dcterms:identifier "methods"]];
     setl:hasContext '''{
   "dataset" : "https://hbgd.tw.rpi.edu/dataset/",
   "sio" :     "http://semanticscience.org/resource/",
@@ -200,8 +208,8 @@ def result(s, *args, **kwargs):
                                 "@if" : "area.find('.//uncertainty')",
                                 "@type" : [
                                   "sio:UncertaintyValue",
-                                  { "@if" : "area.find('.//uncertainty/type').text == 'fraction'", "@id" : "sio:Ratio" },
-                                  { "@if" : "area.find('.//uncertainty/type').text == 'amount'", "@id" : "sio:StandardDeviation" }
+                                  { "@if" : "area.find('.//uncertainty/type').text == 'relative'", "@id" : "sio:Ratio" },
+                                  { "@if" : "area.find('.//uncertainty/type').text == 'absolute'", "@id" : "sio:StandardDeviation" }
                                 ],
                                 "sio:hasValue" : { "@value" : "{{area.find('.//uncertainty/value').text}}", "@type" : "xsd:decimal"}
                               }
@@ -227,8 +235,8 @@ def result(s, *args, **kwargs):
                                 "@if" : "ratio.find('.//uncertainty')",
                                 "@type" : [
                                   "sio:UncertaintyValue",
-                                  { "@if" : "ratio.find('.//uncertainty/type').text == 'fraction'", "@id" : "sio:Ratio" },
-                                  { "@if" : "ratio.find('.//uncertainty/type').text == 'amount'", "@id" : "sio:StandardDeviation" }
+                                  { "@if" : "ratio.find('.//uncertainty/type').text == 'relative'", "@id" : "sio:Ratio" },
+                                  { "@if" : "ratio.find('.//uncertainty/type').text == 'absolute'", "@id" : "sio:StandardDeviation" }
                                 ],
                                 "sio:hasValue" : { "@value" : "{{ratio.find('.//uncertainty/value').text}}", "@type" : "xsd:decimal"}
                               }
@@ -254,8 +262,8 @@ def result(s, *args, **kwargs):
                                 "@if" : "size.find('.//uncertainty') is not None",
                                 "@type" : [
                                   "sio:UncertaintyValue",
-                                  { "@if" : "size.find('.//uncertainty/type').text == 'fraction'", "@id" : "sio:Ratio" },
-                                  { "@if" : "size.find('.//uncertainty/type').text == 'amount'", "@id" : "sio:StandardDeviation" }
+                                  { "@if" : "size.find('.//uncertainty/type').text == 'relative'", "@id" : "sio:Ratio" },
+                                  { "@if" : "size.find('.//uncertainty/type').text == 'absolute'", "@id" : "sio:StandardDeviation" }
                                 ],
                                 "sio:hasValue" : { "@value" : "{{size.find('.//uncertainty/value').text}}", "@type" : "xsd:decimal"}
                               }
@@ -433,8 +441,8 @@ def result(s, *args, **kwargs):
                             "@do" : {
                               "@type" : [
                                 "sio:UncertaintyValue",
-                                { "@if" : "uncertainty.find('type').text == 'fraction'", "@id" : "sio:Ratio" },
-                                { "@if" : "uncertainty.find('type').text == 'amount'", "@id" : "sio:StandardDeviation" }
+                                { "@if" : "uncertainty.find('type').text == 'relative'", "@id" : "sio:Ratio" },
+                                { "@if" : "uncertainty.find('type').text == 'absolute'", "@id" : "sio:StandardDeviation" }
                               ],
                               "sio:hasValue" : { "@value" : "{{uncertainty.find('value').text}}", "@type" : "xsd:decimal"}
                             }
@@ -448,16 +456,84 @@ def result(s, *args, **kwargs):
               }
             ]
           },
-          "nanopub:hasProvenance" : {
-            "@id": "entry:{{id.text.replace(' ','')}}_provenance",
-            "@type": "nanopub:Provenance",
-            "@graph" : [
-            ]
-          },
           "nanopub:hasPublicationInfo" : {
             "@id": "entry:{{id.text.replace(' ','')}}_pubinfo",
             "@type": "nanopub:PublicationInfo",
             "@graph" : [
+            ]
+          },
+          "nanopub:hasProvenance" : {
+            "@id": "entry:{{id.text.replace(' ','')}}_provenance",
+            "@type": "nanopub:Provenance",
+            "@graph" : [
+              {
+                "@id" : "entry:{{id.text.replace(' ','')}}_assertion",
+                "prov:wasGeneratedBy" : [
+                  {
+                    "@for" : "i, method in methods.iterrows()",
+                    "@do" : {
+                      "@if" : "not isempty(method.xpath) and tree.findall('.'+method.xpath)",
+                      "@for" : "value in tree.findall('.'+method.xpath)",
+                      "@do" : [
+                        {
+                          "@id" : "entry:{{id.text.replace(' ','')}}_characterization_{{slugify(value.tag)}}",
+                          "@type" : [
+                            "prov:Activity",
+                            "sio:Measuring",
+                            "{{method.uri}}"
+                          ],
+                          "dc:description" : [ { "@if": "value.find('Description')", "@value" : "{{value.find('Description').text}}"}],
+                          "prov:used" : [
+                             { "@for" : "equipment in value.findall('./Equipment')",
+                               "@do" : {
+                                 "@type" : [
+                                   {
+                                     "@id" : "nanomine:{{slugify(equipment.text)}}",
+                                     "@type" : "owl:Class",
+                                     "rdfs:subClassOf" : {"@id" : "sio:Device"},
+                                     "rdfs:label" : "{{equipment.text}}"
+                                   },
+                                   "sio:Device"
+                                 ],
+                                 "sio:hasAttribute" : [
+                                   {
+                                     "@for" : "i, method_attr in methods.iterrows()",
+                                     "@do" : {
+                                       "@if" : "not isempty('.'+method_attr.xpath) and value.findall('.'+method_attr.xpath)",       
+                                       "@type" : "method_attr.uri",
+                                       "sio:hasValue" : {
+                                         "@value" : "{{value.findall('.'+method_attr.xpath)[0].find('value').text}}",
+                                         "@type" : "xsd:decimal"
+                                       },
+                                       "sio:hasUnit" : [
+                                         { "@if" : "value.findall('.'+method_attr.xpath)[0].find('unit') is not None",
+                                           "@id" : "unit:{{slugify(value.findall('.'+method_attr.xpath)[0].find('unit').text)}}",
+                                           "rdfs:label" : "{{value.findall('.'+method_attr.xpath)[0].find('unit').text}}"
+                                         }
+                                       ],
+                                       "sio:hasAttribute" : [
+                                         {
+                                           "@if" : "value.findall('.'+method_attr.xpath)[0].find('.//uncertainty') is not None",
+                                           "@type" : [
+                                             "sio:UncertaintyValue",
+                                             { "@if" : "value.findall('.'+method_attr.xpath)[0].find('.//uncertainty/type').text == 'relative'", "@id" : "sio:Ratio" },
+                                             { "@if" : "value.findall('.'+method_attr.xpath)[0].find('.//uncertainty/type').text == 'absolute'", "@id" : "sio:StandardDeviation" }
+                                           ],
+                                           "sio:hasValue" : { "@value" : "{{value.findall('.'+method_attr.xpath)[0].find('.//uncertainty/value').text}}", "@type" : "xsd:decimal"}
+                                         }
+                                       ]
+                                     }
+                                   }
+                                 ]
+                               }
+                             }
+                           ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
               {
                 "@for" : "citation in tree.findall('DATA_SOURCE/Citation')",
                 "@do" : {
@@ -551,9 +627,9 @@ def result(s, *args, **kwargs):
 }]"""
   ].
 
-#<nanopublications.trig> a pv:File;
-#    dcterms:format "application/trig";
-#    prov:wasGeneratedBy [
-#      a setl:Load;
-#      prov:used :nanopubs ;
-#    ].
+<nanomine_nanopublications.trig> a pv:File;
+    dcterms:format "application/trig";
+    prov:wasGeneratedBy [
+      a setl:Load;
+      prov:used :nanopubs ;
+    ].

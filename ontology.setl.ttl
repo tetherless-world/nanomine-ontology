@@ -234,11 +234,25 @@
                 "prov:wasQuotedFrom" : [ { "@if" : "not isempty(row.wasQuotedFrom)", "@value": "{{row.wasQuotedFrom}}" }],
                 "nanomine:hasSelector" : [ { "@if" : "not isempty(row.xpath)", "@value": "{{row.xpath}}" }],
                 "rdfs:subClassOf" : [
-                    { "@if" : "not isempty(row.subClassOf)", "@id": "{{row.subClassOf}}" },
-                    { "@if" : "not isempty(row.unit)",
-                      "@type" : "owl:Restriction",
-                      "owl:onProperty" : { "@id":"sio:hasUnit"},
-                      "owl:hasValue" : { "@id": "nanomine:unit/{{slugify(row.unit)}}", "rdfs:label" : "{{row.unit}}", "@type" : "sio:UnitOfMeasurement" }
+                    { "@if" : "not isempty(row.subClassOf)",
+                      "@for" : "superclass in row.subClassOf.split(', ')",
+                      "@do" : { "@id": "{{superClass}}" }
+                    },
+                    { "@if" : "not isempty(row.generates)",
+                      "@for" : "generate_type in row.generates.split(', ')",
+                      "@do" : {
+                        "@type" : "owl:Restriction",
+                        "owl:onProperty" : { "@id":"prov:generated"},
+                        "owl:someValuesFrom" : { "@id": "{{generate_type}}" }
+                      }
+                    },
+                    { "@if" : "not isempty(row.parameters)",
+                      "@for" : "parameter in row.parameters.split(', ')",
+                      "@do" : {
+                        "@type" : "owl:Restriction",
+                        "owl:onProperty" : { "@id":"prov:used"},
+                        "owl:someValuesFrom" : { "@id": "{{parameter}}" }
+                      }
                     }
                 ]
 	    }
