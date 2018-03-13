@@ -125,7 +125,7 @@ def result(s, *args, **kwargs):
                               },
                               { 
                                   "@value" : "{{particle.find('Abbreviation').text}}", 
-                                  "@if" : "particle.find('ChemicalName').text is None"
+                                  "@if" : "particle.find('ChemicalName').text is None and particle.find('Abbreviation').text is not None"
                               }
                           ]
                         },
@@ -136,7 +136,7 @@ def result(s, *args, **kwargs):
                           "rdfs:label" : "{{particle.find('ChemicalName').text}}"
                         },
                         {
-                          "@if" : "(particle.find('PubChemRef') is None or particle.find('PubChemRef').text is None) and particle.find('ChemicalName').text is None",
+                          "@if" : "(particle.find('PubChemRef') is None or particle.find('PubChemRef').text is None) and particle.find('ChemicalName').text is None and particle.find('Abbreviation').text is not None",
                           "@id" : "compound:{{camelcase(particle.find('Abbreviation').text)}}",
                           "@type" : "owl:Class",
                           "rdfs:label" : "{{particle.find('Abbreviation').text}}"
@@ -342,7 +342,7 @@ def result(s, *args, **kwargs):
                               },
                               { 
                                   "@value" : "{{polymer.find('Abbreviation').text}}", 
-                                  "@if" : "polymer.find('ChemicalName').text is None"
+                                  "@if" : "polymer.find('ChemicalName').text is None and polymer.find('Abbreviation').text is not None"
                               }
                           ]
                         },
@@ -353,7 +353,7 @@ def result(s, *args, **kwargs):
                           "rdfs:label" : "{{polymer.find('ChemicalName').text}}"
                         },
                         {
-                          "@if" : "(polymer.find('PubChemRef') is None or polymer.find('PubChemRef').text is None) and polymer.find('ChemicalName').text is None",
+                          "@if" : "(polymer.find('PubChemRef') is None or polymer.find('PubChemRef').text is None) and polymer.find('ChemicalName').text is None and polymer.find('Abbreviation').text is not None",
                           "@id" : "compound:{{camelcase(polymer.find('Abbreviation').text)}}",
                           "@type" : "owl:Class",
                           "rdfs:label" : "{{polymer.find('Abbreviation').text}}"
