@@ -89,7 +89,7 @@ def result(s, *args, **kwargs):
   "xsd" : "http://www.w3.org/2001/XMLSchema#"
 }''';
     prov:value """[{
-    "@if" : "row['schema'] == '5904922ce74a1d36e1b78b7f'",
+    "@if" : "row['schema'] == '5abe807ce74a1d06fd9943a0'",
     "@with" : "parse_xml(row['content']) as tree",
     "@do"  : {
     "@for": "id in tree.findall('ID')",
@@ -104,6 +104,17 @@ def result(s, *args, **kwargs):
             "@id": "entry:{{id.text.replace(' ','')}}_assertion",
             "@type": "nanopub:Assertion",
             "@graph" : [
+              {
+                "@if" : "tree.findtext('Control_ID') is not None",
+                "@id" : "sample:{{slugify(tree.findtext('Control_ID').replace(' ',''))}}", 
+                "sio:hasRole": {
+                  "@type" : "sio:ControlRole",
+                  "@id" : "sample:{{slugify(tree.findtext('Control_ID').replace(' ',''))}}_control_role",
+                  "sio:inRelationTo" : {
+                    "@id" : "sample:{{slugify(id.text.replace(' ',''))}}"
+                  }
+                }
+              },
               {
                 "@id" : "sample:{{slugify(id.text.replace(' ',''))}}",
                 "@type" : [
@@ -555,7 +566,7 @@ def result(s, *args, **kwargs):
                         "dcterms:title" : "{{citation.find('CommonFields/Title').text}}",
                         "rdfs:seeAlso" : {
                           "@if" : "citation.find('CommonFields/URL').text",
-                          "@id" : "{{citation.find('CommonFields/URL').text}}"
+                          "@id" : "{{citation.find('CommonFields/URL').text.replace('<','%3C').replace('>','%3E')}}"
                         },
                         "dcterms:created" : {
                           "@value" : "{{citation.find('CommonFields/PublicationYear').text}}",
@@ -584,6 +595,7 @@ def result(s, *args, **kwargs):
                           }
                         ],
                         "dcterms:isPartOf" : {
+                          "@if" : "citation.find('CommonFields/Publication').text",
                           "@id" : "publication:{{slugify(citation.find('CommonFields/Publication').text)}}",
                           "dcterms:title" : "{{citation.find('CommonFields/Publication').text}}",
                           "dcterms:publisher" : {
