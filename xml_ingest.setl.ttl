@@ -160,8 +160,8 @@ def result(s, *args, **kwargs):
                       "sio:hasAttribute" : [
                         {
                           "@for" : ["fraction in [ x for x in [",
-                                    "particle.find('FillerComponentComposition/*'),",
-                                    "tree.find('MATERIALS/Filler/FillerComposition/*'),",
+                                    "particle.find('FillerComponentComposition/fraction'),",
+                                    "tree.find('MATERIALS/Filler/FillerComposition/fraction'),",
                                     "] if x is not None][:1]"
                                    ],
                           "@do" : {
