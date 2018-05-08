@@ -388,6 +388,7 @@ def result(s, *args, **kwargs):
                              "@for" : "row in table.findall('rows/row')",
                              "@do" : [
                                {
+                                 "@if" : "row.findall('column')[1].text is not None and row.findall('column')[0].text is not None",
                                  "@id" : "sample:{{slugify(id.text.replace(' ',''))}}_{{slugify(property.uri)}}_{{row.attrib['id']}}",
                                  "@type" : [
                                    "nanomine:PolymerNanocomposite"
@@ -395,7 +396,7 @@ def result(s, *args, **kwargs):
                                  "sio:hasAttribute" : [
                                    {
                                      "@type" : "{{property.uri}}",
-                                     "sio:hasValue" : { "@value" : "{{row.findall('column')[1].text}}", "@type": "xsd:decimal"}
+                                     "sio:hasValue" : { "@value" : "{{float(row.findall('column')[1].text)}}", "@type": "xsd:decimal"}
                                    },
                                    {
                                      "@type" : [
@@ -638,10 +639,3 @@ def result(s, *args, **kwargs):
   }
 }]"""
   ].
-
-<nanomine_nanopublications.trig> a pv:File;
-    dcterms:format "application/trig";
-    prov:wasGeneratedBy [
-      a setl:Load;
-      prov:used :nanopubs ;
-    ].
