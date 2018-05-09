@@ -260,16 +260,16 @@
 }]'''].
 
 
-<nanomine.trig> a pv:File;
-    dcterms:format "application/trig";
-    prov:wasGeneratedBy [
-      a setl:Load;
-      prov:used <http://nanomine.tw.rpi.edu/ns> ;
-    ].
+#<nanomine.trig> a pv:File;
+#    dcterms:format "application/trig";
+#    prov:wasGeneratedBy [
+#      a setl:Load;
+#      prov:used <http://nanomine.tw.rpi.edu/ns> ;
+#    ].
 
-<nanomine.ttl> a pv:File;
-    dcterms:format "text/turtle";
-    prov:wasGeneratedBy [
-      a setl:Load;
-      prov:used <http://nanomine.tw.rpi.edu/ns> ;
-    ].
+#<nanomine.ttl> a pv:File;
+#    dcterms:format "text/turtle";
+#    prov:wasGeneratedBy [
+#      a setl:Load;
+#      prov:used <http://nanomine.tw.rpi.edu/ns> ;
+#    ].
