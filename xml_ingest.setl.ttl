@@ -37,6 +37,7 @@
   prov:wasGeneratedBy [
      a setl:Extract;
 #     prov:used <http://129.105.90.149:8000/rest/explore/select?title=L206_S22_Cho_2005.xml&dataformat=xml>
+#     prov:used <http://129.105.90.149:8000/rest/explore/select?title=L193_S1_Palmeri_2010.xml&dataformat=xml>
      prov:used <http://129.105.90.149:8000/rest/explore/select/all?dataformat=xml>;
   ].
 
@@ -48,11 +49,12 @@
 :parse_xml a owl:Class, prov:SoftwareAgent, setl:PythonScript;
   rdfs:subClassOf prov:Activity;
   prov:value '''
-global ET
-import xml.etree.ElementTree as ET
+global etree
+import lxml.etree as etree
 def result(s, *args, **kwargs):
     s = s.encode('utf-8')
-    return ET.fromstring(s, *args, **kwargs)
+    result = etree.fromstring(s, *args, **kwargs)
+    return result
 '''.
 
 :nanopubs a void:Dataset, dcat:Dataset, setl:Persisted;
@@ -171,12 +173,12 @@ def result(s, *args, **kwargs):
                                   {
                                       "@if" : "'%' not in fraction.text",
                                       "@value" : "{{fraction.text.split(' ')[0]}}",
-                                      "@type": "xsd:decimal"
+                                      "@type": "xsd:double"
                                   },
                                   {
                                       "@if" : "'%' in fraction.text",
                                       "@value" : "{{float(fraction.text.replace('%','').split(' ')[0].split('-')[0])/100.0}}",
-                                      "@type": "xsd:decimal"
+                                      "@type": "xsd:double"
                                   }
                               ],
                               "@type" : "nanomine:{{fraction.tag.title()}}Fraction"
@@ -189,7 +191,7 @@ def result(s, *args, **kwargs):
                             "@type" : "sio:Density",
                             "sio:hasValue" : {
                                 "@value" : "{{density.find('value').text}}",
-                                "@type" : "xsd:decimal"
+                                "@type" : "xsd:double"
                               },
                             "sio:hasUnit" : [
                               { "@if" : "density.find('unit')",
@@ -206,7 +208,7 @@ def result(s, *args, **kwargs):
                             "@type" : "sio:SurfaceArea",
                             "sio:hasValue" : {
                                 "@value" : "{{area.find('value').text}}",
-                                "@type" : "xsd:decimal"
+                                "@type" : "xsd:double"
                               },
                             "sio:hasUnit" : [
                               { "@if" : "area.find('unit') is not None",
@@ -222,7 +224,7 @@ def result(s, *args, **kwargs):
                                   { "@if" : "area.find('.//uncertainty/type').text == 'relative'", "@id" : "sio:Ratio" },
                                   { "@if" : "area.find('.//uncertainty/type').text == 'absolute'", "@id" : "sio:StandardDeviation" }
                                 ],
-                                "sio:hasValue" : { "@value" : "{{area.find('.//uncertainty/value').text}}", "@type" : "xsd:decimal"}
+                                "sio:hasValue" : { "@value" : "{{area.find('.//uncertainty/value').text}}", "@type" : "xsd:double"}
                               }
                             ]
                           }
@@ -233,7 +235,7 @@ def result(s, *args, **kwargs):
                             "@type" : "sio:AspectRatio",
                             "sio:hasValue" : {
                                 "@value" : "{{ratio.find('value').text}}",
-                                "@type" : "xsd:decimal"
+                                "@type" : "xsd:double"
                               },
                             "sio:hasUnit" : [
                               { "@if" : "ratio.find('unit') is not None",
@@ -249,7 +251,7 @@ def result(s, *args, **kwargs):
                                   { "@if" : "ratio.find('.//uncertainty/type').text == 'relative'", "@id" : "sio:Ratio" },
                                   { "@if" : "ratio.find('.//uncertainty/type').text == 'absolute'", "@id" : "sio:StandardDeviation" }
                                 ],
-                                "sio:hasValue" : { "@value" : "{{ratio.find('.//uncertainty/value').text}}", "@type" : "xsd:decimal"}
+                                "sio:hasValue" : { "@value" : "{{ratio.find('.//uncertainty/value').text}}", "@type" : "xsd:double"}
                               }
                             ]
                           }
@@ -260,7 +262,7 @@ def result(s, *args, **kwargs):
                             "@type" : "sio:Width",
                             "sio:hasValue" : {
                                 "@value" : "{{size.find('value').text}}",
-                                "@type" : "xsd:decimal"
+                                "@type" : "xsd:double"
                               },
                             "sio:hasUnit" : [
                               { "@if" : "size.find('unit') is not None",
@@ -276,7 +278,7 @@ def result(s, *args, **kwargs):
                                   { "@if" : "size.find('.//uncertainty/type').text == 'relative'", "@id" : "sio:Ratio" },
                                   { "@if" : "size.find('.//uncertainty/type').text == 'absolute'", "@id" : "sio:StandardDeviation" }
                                 ],
-                                "sio:hasValue" : { "@value" : "{{size.find('.//uncertainty/value').text}}", "@type" : "xsd:decimal"}
+                                "sio:hasValue" : { "@value" : "{{size.find('.//uncertainty/value').text}}", "@type" : "xsd:double"}
                               }
                             ]
                           }
@@ -396,7 +398,7 @@ def result(s, *args, **kwargs):
                                  "sio:hasAttribute" : [
                                    {
                                      "@type" : "{{property.uri}}",
-                                     "sio:hasValue" : { "@value" : "{{float(row.findall('column')[1].text)}}", "@type": "xsd:decimal"}
+                                     "sio:hasValue" : { "@value" : "{{float(row.findall('column')[1].text)}}", "@type": "xsd:double"}
                                    },
                                    {
                                      "@type" : [
@@ -412,7 +414,7 @@ def result(s, *args, **kwargs):
                                          "rdfs:label" : "{{table.findall('headers/column')[0].text}}"
                                        }
                                      ],
-                                     "sio:hasValue" : { "@value" : "{{row.findall('column')[0].text}}", "@type": "xsd:decimal"}
+                                     "sio:hasValue" : { "@value" : "{{row.findall('column')[0].text}}", "@type": "xsd:double"}
                                    }
                                  ]
                                }
@@ -438,7 +440,7 @@ def result(s, *args, **kwargs):
                           {
                             "@if" : "value.find('value') is not None",
                             "@value" : "{{value.find('value').text}}",
-                            "@type" : "xsd:decimal"
+                            "@type" : "xsd:double"
                           }
                         ],
                         "sio:hasUnit" : [
@@ -456,7 +458,7 @@ def result(s, *args, **kwargs):
                                 { "@if" : "uncertainty.find('type').text == 'relative'", "@id" : "sio:Ratio" },
                                 { "@if" : "uncertainty.find('type').text == 'absolute'", "@id" : "sio:StandardDeviation" }
                               ],
-                              "sio:hasValue" : { "@value" : "{{uncertainty.find('value').text}}", "@type" : "xsd:decimal"}
+                              "sio:hasValue" : { "@value" : "{{uncertainty.find('value').text}}", "@type" : "xsd:double"}
                             }
                           }
                         ]
@@ -515,7 +517,7 @@ def result(s, *args, **kwargs):
                                        "@type" : "method_attr.uri",
                                        "sio:hasValue" : {
                                          "@value" : "{{value.findall('.'+method_attr.xpath)[0].find('value').text}}",
-                                         "@type" : "xsd:decimal"
+                                         "@type" : "xsd:double"
                                        },
                                        "sio:hasUnit" : [
                                          { "@if" : "value.findall('.'+method_attr.xpath)[0].find('unit') is not None",
@@ -531,7 +533,7 @@ def result(s, *args, **kwargs):
                                              { "@if" : "value.findall('.'+method_attr.xpath)[0].find('.//uncertainty/type').text == 'relative'", "@id" : "sio:Ratio" },
                                              { "@if" : "value.findall('.'+method_attr.xpath)[0].find('.//uncertainty/type').text == 'absolute'", "@id" : "sio:StandardDeviation" }
                                            ],
-                                           "sio:hasValue" : { "@value" : "{{value.findall('.'+method_attr.xpath)[0].find('.//uncertainty/value').text}}", "@type" : "xsd:decimal"}
+                                           "sio:hasValue" : { "@value" : "{{value.findall('.'+method_attr.xpath)[0].find('.//uncertainty/value').text}}", "@type" : "xsd:double"}
                                          }
                                        ]
                                      }
@@ -639,3 +641,10 @@ def result(s, *args, **kwargs):
   }
 }]"""
   ].
+
+#<nanopubs.trig> a pv:File;
+#    dcterms:format "application/trig";
+#    prov:wasGeneratedBy [
+#      a setl:Load;
+#      prov:used :nanopubs ;
+#    ].
