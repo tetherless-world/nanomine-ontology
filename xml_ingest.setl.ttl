@@ -163,7 +163,7 @@ def result(s, *args, **kwargs):
                         {
                           "@for" : ["fraction in [ x for x in [",
                                     "particle.find('FillerComponentComposition/volume'),",
-                                    "tree.find('MATERIALS/Filler/FillerComposition/volume'),",
+                                    "tree.find('MATERIALS/Filler/FillerComposition/Fraction/volume'),",
                                     "] if x is not None][:1]"
                                    ],
                           "@do" : {
@@ -187,7 +187,7 @@ def result(s, *args, **kwargs):
                         {
                           "@for" : ["fraction in [ x for x in [",
                                     "particle.find('FillerComponentComposition/mass'),",
-                                    "tree.find('MATERIALS/Filler/FillerComposition/mass'),",
+                                    "tree.find('MATERIALS/Filler/FillerComposition/Fraction/mass'),",
                                     "] if x is not None][:1]"
                                    ],
                           "@do" : {
