@@ -91,7 +91,7 @@ def result(s, *args, **kwargs):
   "xsd" : "http://www.w3.org/2001/XMLSchema#"
 }''';
     prov:value """[{
-    "@if" : "row['schema'] == '5b1ebeb9e74a1d61fc43654d' and not row['title'].startswith('L8') ",
+    "@if" : "row['schema'] == '5b5f3559e74a1d4cdbaef171'",
     "@with" : "parse_xml(row['content']) as tree",
     "@do"  : {
     "@for": "id in tree.findall('ID')",
