@@ -36,9 +36,7 @@
   api_vocab:selector "item";
   prov:wasGeneratedBy [
      a setl:Extract;
-#     prov:used <http://129.105.90.149:8000/rest/explore/select?title=L206_S22_Cho_2005.xml&dataformat=xml>
-#     prov:used <http://129.105.90.149:8000/rest/explore/select?title=L193_S1_Palmeri_2010.xml&dataformat=xml>
-     prov:used <http://129.105.90.149:8000/rest/explore/select/all?dataformat=xml>;
+     prov:used <http://129.105.90.149:8000/rest/explore/select?schema=5b71eb00e74a1d7c81bec6c7&dataformat=xml>;
   ].
 
 
@@ -91,7 +89,7 @@ def result(s, *args, **kwargs):
   "xsd" : "http://www.w3.org/2001/XMLSchema#"
 }''';
     prov:value """[{
-    "@if" : "row['schema'] == '5b5f3559e74a1d4cdbaef171'",
+    "@if" : "row['schema'] == '5b71eb00e74a1d7c81bec6c7'",
     "@with" : "parse_xml(row['content']) as tree",
     "@do"  : {
     "@for": "id in tree.findall('ID')",
