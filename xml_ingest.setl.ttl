@@ -36,9 +36,7 @@
   api_vocab:selector "item";
   prov:wasGeneratedBy [
      a setl:Extract;
-#     prov:used <http://129.105.90.149:8000/rest/explore/select?title=L206_S22_Cho_2005.xml&dataformat=xml>
-#     prov:used <http://129.105.90.149:8000/rest/explore/select?title=L193_S1_Palmeri_2010.xml&dataformat=xml>
-     prov:used <http://129.105.90.149:8000/rest/explore/select/all?dataformat=xml>;
+     prov:used <http://129.105.90.149:8000/rest/explore/select?schema=5b71eb00e74a1d7c81bec6c7&dataformat=xml>;
   ].
 
 
@@ -91,7 +89,7 @@ def result(s, *args, **kwargs):
   "xsd" : "http://www.w3.org/2001/XMLSchema#"
 }''';
     prov:value """[{
-    "@if" : "row['schema'] == '5abe807ce74a1d06fd9943a0'",
+    "@if" : "row['schema'] == '5b71eb00e74a1d7c81bec6c7'",
     "@with" : "parse_xml(row['content']) as tree",
     "@do"  : {
     "@for": "id in tree.findall('ID')",
@@ -108,7 +106,7 @@ def result(s, *args, **kwargs):
             "@graph" : [
               {
                 "@if" : "tree.findtext('Control_ID') is not None",
-                "@id" : "sample:{{slugify(tree.findtext('Control_ID').replace(' ',''))}}", 
+                "@id" : "sample:{{slugify(tree.findtext('Control_ID').replace(' ',''))}}",
                 "sio:hasRole": {
                   "@type" : "sio:ControlRole",
                   "@id" : "sample:{{slugify(tree.findtext('Control_ID').replace(' ',''))}}_control_role",
@@ -132,12 +130,12 @@ def result(s, *args, **kwargs):
                           "@id" : "pubchem:{{particle.find('PubChemRef').text.replace(' ','')}}",
                           "@type" : "owl:Class",
                           "rdfs:label" : [
-                              { 
-                                  "@value" : "{{particle.find('ChemicalName').text}}", 
+                              {
+                                  "@value" : "{{particle.find('ChemicalName').text}}",
                                   "@if" : "particle.find('ChemicalName').text is not None"
                               },
-                              { 
-                                  "@value" : "{{particle.find('Abbreviation').text}}", 
+                              {
+                                  "@value" : "{{particle.find('Abbreviation').text}}",
                                   "@if" : "particle.find('ChemicalName').text is None and particle.find('Abbreviation').text is not None"
                               }
                           ]
@@ -162,8 +160,32 @@ def result(s, *args, **kwargs):
                       "sio:hasAttribute" : [
                         {
                           "@for" : ["fraction in [ x for x in [",
-                                    "particle.find('FillerComponentComposition/fraction'),",
-                                    "tree.find('MATERIALS/Filler/FillerComposition/fraction'),",
+                                    "particle.find('FillerComponentComposition/volume'),",
+                                    "tree.find('MATERIALS/Filler/FillerComposition/Fraction/volume'),",
+                                    "] if x is not None][:1]"
+                                   ],
+                          "@do" : {
+                              "@id" : "sample:{{slugify(id.text.replace(' ',''))}}_filler_{{fc}}_{{fraction.tag}}_fraction",
+                              "rdfs:label" : "{{fraction.text}}",
+                              "sio:hasValue" : [
+                                  {
+                                      "@if" : "'%' not in fraction.text",
+                                      "@value" : "{{fraction.text.split(' ')[0]}}",
+                                      "@type": "xsd:double"
+                                  },
+                                  {
+                                      "@if" : "'%' in fraction.text",
+                                      "@value" : "{{float(fraction.text.replace('%','').split(' ')[0].split('-')[0])/100.0}}",
+                                      "@type": "xsd:double"
+                                  }
+                              ],
+                              "@type" : "nanomine:{{fraction.tag.title()}}Fraction"
+                            }
+                        },
+                        {
+                          "@for" : ["fraction in [ x for x in [",
+                                    "particle.find('FillerComponentComposition/mass'),",
+                                    "tree.find('MATERIALS/Filler/FillerComposition/Fraction/mass'),",
                                     "] if x is not None][:1]"
                                    ],
                           "@do" : {
@@ -308,12 +330,12 @@ def result(s, *args, **kwargs):
                           "@id" : "pubchem:{{surface.find('PubChemRef').text.replace(' ','')}}",
                           "@type" : "owl:Class",
                           "rdfs:label" : [
-                              { 
-                                  "@value" : "{{surface.find('ChemicalName').text}}", 
+                              {
+                                  "@value" : "{{surface.find('ChemicalName').text}}",
                                   "@if" : "surface.find('ChemicalName').text is not None"
                               },
-                              { 
-                                  "@value" : "{{surface.find('Abbreviation').text}}", 
+                              {
+                                  "@value" : "{{surface.find('Abbreviation').text}}",
                                   "@if" : "surface.find('ChemicalName').text is None and surface.find('Abbreviation').text is not None"
                               }
                           ]
@@ -349,12 +371,12 @@ def result(s, *args, **kwargs):
                           "@id" : "pubchem:{{polymer.find('PubChemRef').text.replace(' ','')}}",
                           "@type" : "owl:Class",
                           "rdfs:label" : [
-                              { 
-                                  "@value" : "{{polymer.find('ChemicalName').text}}", 
+                              {
+                                  "@value" : "{{polymer.find('ChemicalName').text}}",
                                   "@if" : "polymer.find('ChemicalName').text is not None"
                               },
-                              { 
-                                  "@value" : "{{polymer.find('Abbreviation').text}}", 
+                              {
+                                  "@value" : "{{polymer.find('Abbreviation').text}}",
                                   "@if" : "polymer.find('ChemicalName').text is None and polymer.find('Abbreviation').text is not None"
                               }
                           ]
@@ -513,7 +535,7 @@ def result(s, *args, **kwargs):
                                    {
                                      "@for" : "i, method_attr in methods.iterrows()",
                                      "@do" : {
-                                       "@if" : "not isempty('.'+method_attr.xpath) and value.findall('.'+method_attr.xpath)",       
+                                       "@if" : "not isempty('.'+method_attr.xpath) and value.findall('.'+method_attr.xpath)",
                                        "@type" : "method_attr.uri",
                                        "sio:hasValue" : {
                                          "@value" : "{{value.findall('.'+method_attr.xpath)[0].find('value').text}}",
@@ -589,7 +611,7 @@ def result(s, *args, **kwargs):
                         "dcterms:creator" : [
                           {
                             "@for" : "author in citation.findall('CommonFields/Author')",
-                            "@do" : 
+                            "@do" :
                               {
                                 "@id" : "author:{{slugify(author.text)}}",
                                 "@type" : "prov:Agent",
